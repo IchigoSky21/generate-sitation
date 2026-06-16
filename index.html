@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asisten Riset - Generator Sitasi</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <header class="top-header">
+            <h1><i class='bx bxs-quote-alt-left text-primary'></i> Generator Sitasi</h1>
+            <p class="text-muted">Susun referensi standar IEEE atau APA secara otomatis untuk keperluan akademis Anda.</p>
+        </header>
+
+        <main class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Detail Sumber Referensi</h2>
+                </div>
+                <form id="citation-form">
+                    <div class="form-group">
+                        <label for="input-author">Nama Penulis</label>
+                        <input type="text" id="input-author" placeholder="Contoh: John Smith atau J. Smith" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 3;">
+                            <label for="input-title">Judul Artikel / Dokumen</label>
+                            <input type="text" id="input-title" placeholder="Masukkan judul dokumen..." required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="input-year">Tahun Terbit</label>
+                            <input type="number" id="input-year" placeholder="Contoh: 2024" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-source">Nama Jurnal / Konferensi / Situs Web</label>
+                        <input type="text" id="input-source" placeholder="Contoh: IEEE Transactions on Software Engineering" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-url">URL atau DOI (Opsional)</label>
+                        <input type="text" id="input-url" placeholder="https://doi.org/...">
+                    </div>
+
+                    <div class="action-buttons" style="display: flex; gap: 12px; margin-top: 20px;">
+                        <button type="button" id="btn-ieee" class="btn btn-primary"><i class='bx bx-check-double'></i> Generate IEEE</button>
+                        <button type="button" id="btn-apa" class="btn btn-secondary">Generate APA</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card hidden" id="result-card" style="margin-top: 24px;">
+                <div class="card-header">
+                    <h2><i class='bx bx-check-circle text-success'></i> Hasil Sitasi (<span id="citation-type-label"></span>)</h2>
+                </div>
+                <div class="result-box" style="display: flex; justify-content: space-between; align-items: flex-start; background: var(--bg-main); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
+                    <p id="output-text" style="font-size: 1rem; line-height: 1.6; margin-right: 16px;"></p>
+                    <button id="btn-copy" class="btn icon-btn" title="Salin teks">
+                        <i class='bx bx-copy'></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
