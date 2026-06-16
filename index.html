@@ -26,7 +26,7 @@
                 <form id="citation-form">
                     <div class="form-group">
                         <label for="input-author">Nama Penulis</label>
-                        <input type="text" id="input-author" placeholder="Contoh: John Smith atau J. Smith" required>
+                        <input type="text" id="input-author" placeholder="Contoh: john smith atau J. Smith" required>
                     </div>
 
                     <div class="form-row">
@@ -42,7 +42,7 @@
 
                     <div class="form-group">
                         <label for="input-source">Nama Jurnal / Konferensi / Situs Web</label>
-                        <input type="text" id="input-source" placeholder="Contoh: IEEE Transactions on Software Engineering" required>
+                        <input type="text" id="input-source" placeholder="Contoh: ieee transactions on software engineering" required>
                     </div>
 
                     <div class="form-group">
@@ -61,11 +61,24 @@
                 <div class="card-header">
                     <h2><i class='bx bx-check-circle text-success'></i> Hasil Sitasi (<span id="citation-type-label"></span>)</h2>
                 </div>
-                <div class="result-box" style="display: flex; justify-content: space-between; align-items: flex-start; background: var(--bg-main); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
+                <div class="result-box">
                     <p id="output-text" style="font-size: 1rem; line-height: 1.6; margin-right: 16px;"></p>
                     <button id="btn-copy" class="btn icon-btn" title="Salin teks">
                         <i class='bx bx-copy'></i>
                     </button>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 24px;">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2><i class='bx bx-history text-primary'></i> Riwayat Daftar Pustaka</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="btn-export-bibtex" class="btn btn-success" style="padding: 8px 12px; font-size: 0.85rem;"><i class='bx bxs-file-export'></i> Export BibTeX</button>
+                        <button id="btn-clear-history" class="btn btn-secondary" style="padding: 8px 12px; font-size: 0.85rem;"><i class='bx bx-trash'></i> Kosongkan</button>
+                    </div>
+                </div>
+                <div id="history-list" class="history-container">
+                    <p class="text-muted">Belum ada riwayat sitasi yang disimpan.</p>
                 </div>
             </div>
         </main>
