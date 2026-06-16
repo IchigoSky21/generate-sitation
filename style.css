@@ -227,3 +227,33 @@ input:focus {
     .btn { width: 100%; margin-bottom: 10px; }
     .card { padding: 20px; box-shadow: 4px 4px 0px var(--border); }
 }
+/* --- Tambahan Baru: Efek Tombol Aktif & Pojok Literasi --- */
+
+/* Efek saat tombol sedang dipilih/aktif */
+.btn.active {
+    transform: translate(4px, 4px);
+    box-shadow: 0px 0px 0px var(--border);
+    background: var(--text-dark) !important;
+    color: var(--surface) !important;
+    border-color: var(--text-dark);
+}
+
+/* Gaya Tipografi untuk Pojok Literasi (Gaya Koran) */
+.info-content h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px dashed var(--border);
+    display: inline-block;
+}
+
+.info-content p, .info-content li {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    font-weight: 700;
+    color: var(--text-muted);
+}
