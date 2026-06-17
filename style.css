@@ -1,29 +1,28 @@
 /* =========================================================
-   TEMA 1: MODERN ACADEMIC (CAMPUS PRIDE - NAVY & GOLD)
+   TEMA 2: DEVELOPER DARK MODE (IDE / CODE EDITOR)
 ========================================================= */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:wght@700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 :root {
-    --bg-main: #F4F6F8; /* Abu-abu sangat terang */
-    --surface: #FFFFFF;
-    --text-dark: #1E293B; /* Slate 800 - Navy Gelap */
-    --text-muted: #64748B;
-    --primary: #0F172A; /* Biru Dongker (Navy) Pekat */
-    --primary-hover: #1E293B;
-    --secondary: #F59E0B; /* Kuning Emas (Amber) */
-    --secondary-hover: #D97706;
-    --success: #10B981; /* Hijau Zamrud */
-    --border: #E2E8F0;
-    --shadow-card: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.01);
-    --radius-lg: 16px;
-    --radius-md: 8px;
+    --bg-main: #121212; /* Background luar (Sangat gelap) */
+    --surface: #1E1E1E; /* Background Card (Mirip VS Code) */
+    --text-dark: #D4D4D4; /* Abu-abu terang untuk teks utama */
+    --text-muted: #858585; /* Abu-abu redup untuk label/hint */
+    --primary: #0E639C; /* VS Code Blue */
+    --primary-hover: #1177BB;
+    --secondary: #2D2D2D; /* Panel background */
+    --secondary-hover: #3D3D3D;
+    --success: #6A9955; /* String/Comment Green */
+    --border: #333333;
+    --radius-lg: 8px;
+    --radius-md: 4px; /* Sudut kotak, tidak terlalu bulat */
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
+    font-family: 'JetBrains Mono', monospace; /* Font coding murni */
 }
 
 body {
@@ -36,115 +35,120 @@ body {
 
 .app-container { width: 100%; max-width: 800px; }
 
-.top-header { text-align: center; margin-bottom: 30px; }
+.top-header { text-align: center; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px;}
 .top-header h1 {
-    font-family: 'Merriweather', serif; /* Font Serif Jurnal */
-    font-size: 2.2rem;
-    color: var(--primary);
+    font-size: 2rem; color: #FFFFFF;
     display: flex; justify-content: center; align-items: center; gap: 10px;
 }
+.top-header h1 i { color: var(--primary); }
 
 .text-primary { color: var(--primary); }
 .text-success { color: var(--success); }
-.text-muted { color: var(--text-muted); font-size: 0.95rem; margin-top: 8px; }
+.text-muted { color: var(--text-muted); font-size: 0.85rem; margin-top: 8px; }
 
 .card {
     background: var(--surface);
     border-radius: var(--radius-lg);
     padding: 30px;
-    box-shadow: var(--shadow-card);
     margin-bottom: 24px;
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 .card-header h2 {
-    font-family: 'Merriweather', serif;
-    font-size: 1.3rem;
-    margin-bottom: 20px;
+    font-size: 1.1rem; margin-bottom: 20px;
     display: flex; align-items: center; gap: 8px;
-    color: var(--primary);
+    color: #4EC9B0; /* Cyan untuk header (Mirip Class Name di IDE) */
+    font-weight: 500;
 }
 
 .form-group { margin-bottom: 16px; display: flex; flex-direction: column; }
 .form-row { display: flex; gap: 16px; }
 
 label {
-    font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;
-    color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+    font-size: 0.8rem; font-weight: 500; margin-bottom: 8px;
+    color: #9CDCFE; /* Light blue untuk label (Mirip variabel) */
 }
 
 input, select {
     padding: 12px 16px;
+    background-color: #252526;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    font-size: 0.95rem; outline: none; transition: 0.3s;
-    background-color: #F8FAFC;
+    color: #CE9178; /* Orange-ish untuk string input */
+    font-size: 0.9rem; outline: none; transition: 0.2s;
 }
+input::placeholder { color: #555555; }
 input:focus, select:focus {
-    border-color: var(--secondary);
-    background-color: var(--surface);
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+    border-color: var(--primary);
+    box-shadow: inset 0 0 0 1px var(--primary);
 }
 
 .btn {
-    padding: 12px 24px; border: none; border-radius: var(--radius-md);
-    font-weight: 600; cursor: pointer; display: inline-flex;
+    padding: 12px 24px; border: 1px solid transparent; border-radius: var(--radius-md);
+    font-weight: 700; cursor: pointer; display: inline-flex;
     align-items: center; justify-content: center; gap: 8px;
-    transition: 0.2s; font-size: 0.95rem;
+    transition: 0.2s; font-size: 0.9rem;
 }
 .btn-primary { background: var(--primary); color: white; }
-.btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
-.btn-secondary { background: var(--secondary); color: white; }
-.btn-secondary:hover { background: var(--secondary-hover); transform: translateY(-2px); }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-secondary { background: var(--secondary); color: var(--text-dark); border-color: var(--border); }
+.btn-secondary:hover { background: var(--secondary-hover); }
 .btn-success { background: var(--success); color: white; }
-.btn-success:hover { background: #059669; }
+.btn-success:hover { background: #4E7A3E; }
 
+/* Efek Tombol Aktif - Glow Effect */
 .btn.active {
-    background: var(--secondary) !important;
-    color: white !important;
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-    transform: translateY(-2px);
+    background: transparent !important;
+    color: #4EC9B0 !important;
+    border-color: #4EC9B0;
+    box-shadow: 0 0 10px rgba(78, 201, 176, 0.2);
 }
 
 .icon-btn {
-    background: var(--bg-main); color: var(--text-muted);
+    background: transparent; color: var(--text-muted);
     padding: 10px; font-size: 1.2rem; border-radius: var(--radius-md);
+    border: 1px solid var(--border);
 }
-.icon-btn:hover { background: var(--border); color: var(--text-dark); }
-.icon-btn.success { background: var(--success); color: white; }
+.icon-btn:hover { background: var(--secondary); color: #FFF; }
+.icon-btn.success { background: var(--success); color: white; border-color: var(--success); }
 
 .hidden { display: none !important; }
 
+/* Hasil Sitasi layaknya terminal output */
 .result-box {
     display: flex; justify-content: space-between; align-items: flex-start;
-    background: var(--bg-main); padding: 20px; border-radius: var(--radius-md);
-    border-left: 4px solid var(--secondary);
+    background: #000000; padding: 20px; border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    border-left: 3px solid #DCDCAA; /* Yellow function color */
 }
 
 .history-container { max-height: 300px; overflow-y: auto; padding-right: 5px; }
-.history-container::-webkit-scrollbar { width: 8px; }
-.history-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.history-container::-webkit-scrollbar { width: 10px; }
+.history-container::-webkit-scrollbar-track { background: var(--surface); }
+.history-container::-webkit-scrollbar-thumb { background: #424242; }
+.history-container::-webkit-scrollbar-thumb:hover { background: #4F4F4F; }
 
 .history-item {
-    background: var(--surface); padding: 16px; border-radius: var(--radius-md);
+    background: var(--bg-main); padding: 16px; border-radius: var(--radius-md);
     margin-bottom: 12px; border: 1px solid var(--border);
     display: flex; justify-content: space-between; align-items: center; gap: 16px;
-    transition: 0.2s;
 }
-.history-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-color: var(--secondary); }
 
-.history-text { font-size: 0.9rem; line-height: 1.6; }
+.history-text { font-size: 0.85rem; line-height: 1.6; color: #CE9178; }
 .history-badge {
-    font-size: 0.7rem; font-weight: 600; padding: 4px 8px;
-    border-radius: 6px; background: var(--bg-main);
-    color: var(--primary); margin-bottom: 8px; display: inline-block;
+    font-size: 0.7rem; font-weight: 700; padding: 4px 8px;
+    border-radius: 4px; background: var(--secondary);
+    color: #C586C0; /* Purple keyword color */
+    margin-bottom: 8px; display: inline-block; border: 1px solid var(--border);
 }
 
 .info-content h3 {
-    font-family: 'Merriweather', serif; font-size: 1.1rem;
-    margin-top: 20px; margin-bottom: 10px; color: var(--primary);
+    font-size: 1rem; margin-top: 20px; margin-bottom: 10px;
+    color: #569CD6; /* Blue variable color */
+    border-bottom: 1px dashed var(--border); display: inline-block; padding-bottom: 5px;
 }
-.info-content p, .info-content li { font-size: 0.95rem; line-height: 1.7; color: var(--text-muted); }
+.info-content p, .info-content li { font-size: 0.85rem; line-height: 1.7; color: var(--text-dark); }
 
 @media (max-width: 600px) {
     .form-row { flex-direction: column; gap: 0; }
