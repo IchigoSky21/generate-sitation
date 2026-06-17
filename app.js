@@ -15,9 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnExportBibtex = document.getElementById('btn-export-bibtex');
     const btnExportTxt    = document.getElementById('btn-export-txt');
     const btnClearHistory = document.getElementById('btn-clear-history');
-    const typeBtns        = document.querySelectorAll('.type-btn');
+    
+    // Perbaikan seleksi tombol sumber HTML
+    const sourceBtns      = document.querySelectorAll('.source-btn'); 
     const sourceLabelEl   = document.getElementById('source-label');
     const sourceInput     = document.getElementById('input-source');
+    
     const doiInput        = document.getElementById('input-doi-quick');
     const btnDoiFetch     = document.getElementById('btn-doi-fetch');
 
@@ -42,9 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
         thesis:     { label: 'Nama Universitas',                    placeholder: 'Contoh: Binus University, Universitas Indonesia' },
     };
 
-    typeBtns.forEach(btn => {
+    sourceBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            typeBtns.forEach(b => b.classList.remove('active'));
+            sourceBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentSourceType = btn.dataset.type;
             updateFormFields();
@@ -61,14 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ====================================================
-       TEXT FORMATTERS
+       TEXT FORMATTERS & PARSING NAMA
     ==================================================== */
     const toTitleCase    = s => s.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.substr(1).toLowerCase());
     const toSentenceCase = s => s ? s.charAt(0).toUpperCase() + s.substr(1).toLowerCase() : s;
 
-    /**
-     * "john william smith" → "J. W. Smith"  (IEEE format)
-     */
     function ieeeName(fullName) {
         const parts = fullName.trim().split(/\s+/);
         if (parts.length < 2) return toTitleCase(fullName.trim());
@@ -77,9 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${initials} ${last}`;
     }
 
-    /**
-     * "john william smith" → "Smith, J. W."  (APA format)
-     */
     function apaName(fullName) {
         const parts = fullName.trim().split(/\s+/);
         if (parts.length < 2) return toTitleCase(fullName.trim());
@@ -88,9 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${last}, ${initials}`;
     }
 
-    /**
-     * "John Smith, Jane Doe, Bob Lee" → IEEE multi-author string
-     */
     function formatIEEEAuthors(str, isOrg) {
         if (isOrg) return str.trim();
         const list = str.split(',').map(a => a.trim()).filter(Boolean).map(ieeeName);
@@ -99,9 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return list.slice(0, -1).join(', ') + ', and ' + list[list.length - 1];
     }
 
-    /**
-     * "John Smith, Jane Doe, Bob Lee" → APA multi-author string
-     */
     function formatAPAAuthors(str, isOrg) {
         if (isOrg) return str.trim();
         const list = str.split(',').map(a => a.trim()).filter(Boolean).map(apaName);
@@ -112,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ====================================================
-       FORM DATA & VALIDATION
+       FORM DATA
     ==================================================== */
     function getVal(id) {
         const el = document.getElementById(id);
@@ -126,22 +117,17 @@ document.addEventListener('DOMContentLoaded', () => {
             title:        getVal('input-title'),
             year:         getVal('input-year'),
             source:       getVal('input-source'),
-            // Jurnal
             volume:       getVal('input-volume'),
             issue:        getVal('input-issue'),
             pages:        getVal('input-pages'),
             url:          getVal('input-url'),
-            // Buku
             city:         getVal('input-city'),
             edition:      getVal('input-edition'),
-            // Konferensi
             confLocation: getVal('input-conf-location'),
             confPages:    getVal('input-conf-pages'),
             confUrl:      getVal('input-conf-url'),
-            // Website
             webUrl:       getVal('input-web-url'),
             accessDate:   getVal('input-access-date'),
-            // Skripsi/Tesis
             thesisType:   getVal('input-thesis-type') || 'Skripsi',
             thesisUrl:    getVal('input-thesis-url'),
         };
@@ -151,14 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!raw.author) { alert('Kolom Penulis wajib diisi!'); return false; }
         if (!raw.title)  { alert('Kolom Judul wajib diisi!'); return false; }
         if (!raw.year)   { alert('Kolom Tahun wajib diisi!'); return false; }
-        const y = parseInt(raw.year);
-        if (isNaN(y) || y < 1900 || y > 2099) { alert('Tahun tidak valid! Masukkan antara 1900–2099.'); return false; }
         if (!raw.source && currentSourceType !== 'website') {
             alert(`Kolom "${sourceConfig[currentSourceType].label}" wajib diisi!`);
-            return false;
-        }
-        if (currentSourceType === 'website' && !raw.webUrl) {
-            alert('URL wajib diisi untuk sumber jenis Website!');
             return false;
         }
         return true;
@@ -172,9 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const source = toTitleCase(raw.source);
 
         switch (currentSourceType) {
-
             case 'journal': {
-                // Judul artikel IEEE → Sentence case (hanya huruf pertama kapital)
                 let c = `[${num}] ${author}, "${toSentenceCase(raw.title)}," ${source}`;
                 if (raw.volume) c += `, vol. ${raw.volume}`;
                 if (raw.issue)  c += `, no. ${raw.issue}`;
@@ -183,9 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (raw.url)    c += ` Available: ${raw.url}.`;
                 return c;
             }
-
             case 'book': {
-                // Judul buku IEEE → Title Case
                 let c = `[${num}] ${author}, ${toTitleCase(raw.title)}`;
                 if (raw.edition) c += `, ${raw.edition} ed.`;
                 if (raw.city && source) c += `. ${raw.city}: ${source}`;
@@ -193,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 c += `, ${raw.year}.`;
                 return c;
             }
-
             case 'conference': {
                 let c = `[${num}] ${author}, "${toSentenceCase(raw.title)}," in Proc. ${source}`;
                 if (raw.confLocation) c += `, ${raw.confLocation}`;
@@ -203,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (raw.confUrl) c += ` Available: ${raw.confUrl}.`;
                 return c;
             }
-
             case 'website': {
                 let c = `[${num}] ${author}. (${raw.year}). "${toSentenceCase(raw.title)}." [Online]. Available: ${raw.webUrl}`;
                 if (raw.accessDate) {
@@ -213,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 return c + `.`;
             }
-
             case 'thesis': {
                 let c = `[${num}] ${author}, "${toSentenceCase(raw.title)}," ${raw.thesisType}, ${toTitleCase(raw.source)}, ${raw.year}.`;
                 if (raw.thesisUrl) c += ` Available: ${raw.thesisUrl}.`;
@@ -228,9 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const source = toTitleCase(raw.source);
 
         switch (currentSourceType) {
-
             case 'journal': {
-                // Nama penulis APA → Last, F. | Judul artikel → Sentence case
                 let c = `${author}. (${raw.year}). ${toSentenceCase(raw.title)}. ${source}`;
                 if (raw.volume && raw.issue) c += `, ${raw.volume}(${raw.issue})`;
                 else if (raw.volume)         c += `, ${raw.volume}`;
@@ -239,7 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (raw.url) c += ` ${raw.url}`;
                 return c;
             }
-
             case 'book': {
                 let c = `${author}. (${raw.year}). ${toSentenceCase(raw.title)}`;
                 if (raw.edition) c += ` (${raw.edition} ed.)`;
@@ -247,7 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (source) c += ` ${source}.`;
                 return c;
             }
-
             case 'conference': {
                 let c = `${author}. (${raw.year}). ${toSentenceCase(raw.title)}. In Proceedings of ${source}`;
                 if (raw.confPages) c += ` (pp. ${raw.confPages})`;
@@ -255,14 +224,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (raw.confUrl) c += ` ${raw.confUrl}`;
                 return c;
             }
-
             case 'website': {
                 let c = `${author}. (${raw.year}). ${toSentenceCase(raw.title)}.`;
                 if (source) c += ` ${source}.`;
                 c += ` ${raw.webUrl}`;
                 return c;
             }
-
             case 'thesis': {
                 let c = `${author}. (${raw.year}). ${toSentenceCase(raw.title)} [${raw.thesisType}, ${toTitleCase(raw.source)}].`;
                 if (raw.thesisUrl) c += ` ${raw.thesisUrl}`;
@@ -273,8 +240,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ====================================================
-       GENERATE BUTTONS
+       GENERATE BUTTONS & FORMATTER
     ==================================================== */
+    function setBtnActiveFormat(activeBtn) {
+        btnIEEE.classList.remove('active-format');
+        btnAPA.classList.remove('active-format');
+        activeBtn.classList.add('active-format');
+    }
+
     btnIEEE.addEventListener('click', () => {
         const raw = getRaw();
         if (!validate(raw)) return;
@@ -283,6 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = buildIEEE(raw, ieeeCounter);
         displayResult(text, 'IEEE');
         saveHistory(text, 'IEEE', raw, currentSourceType, ieeeCounter);
+        setBtnActiveFormat(btnIEEE);
     });
 
     btnAPA.addEventListener('click', () => {
@@ -291,25 +265,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = buildAPA(raw);
         displayResult(text, 'APA');
         saveHistory(text, 'APA', raw, currentSourceType, null);
+        setBtnActiveFormat(btnAPA);
     });
 
     btnReset.addEventListener('click', () => {
         document.getElementById('citation-form').reset();
         if (doiInput) doiInput.value = '';
-        // Reset type selector ke Journal
-        typeBtns.forEach(b => { b.classList.remove('active'); if (b.dataset.type === 'journal') b.classList.add('active'); });
+        sourceBtns.forEach(b => { b.classList.remove('active'); if (b.dataset.type === 'journal') b.classList.add('active'); });
         currentSourceType = 'journal';
         updateFormFields();
         resultCard.classList.add('hidden');
-    });
-
-    // Keyboard shortcut: Ctrl+Enter / Cmd+Enter → Generate IEEE
-    document.addEventListener('keydown', e => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); btnIEEE.click(); }
+        btnIEEE.classList.remove('active-format');
+        btnAPA.classList.remove('active-format');
     });
 
     /* ====================================================
-       DOI AUTO-FETCH  (CrossRef Public API)
+       DOI AUTO-FETCH
     ==================================================== */
     btnDoiFetch.addEventListener('click', fetchDOI);
     doiInput.addEventListener('keydown', e => { if (e.key === 'Enter') fetchDOI(); });
@@ -317,8 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchDOI() {
         let val = doiInput.value.trim();
         if (!val) { alert('Tempel DOI terlebih dahulu!'); return; }
-
-        // Normalisasi: hapus prefix URL
         val = val.replace(/^https?:\/\/(dx\.)?doi\.org\//i, '').replace(/^doi:\s*/i, '');
 
         btnDoiFetch.innerHTML  = '<i class=\'bx bx-loader-alt bx-spin\'></i> Memuat...';
@@ -326,56 +295,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const res = await fetch(`https://api.crossref.org/works/${encodeURIComponent(val)}`);
-            if (!res.ok) throw new Error(`DOI tidak ditemukan (HTTP ${res.status})`);
+            if (!res.ok) throw new Error(`DOI tidak ditemukan`);
             const { message: m } = await res.json();
 
-            // Ekstrak data dari respons CrossRef
             const authors = (m.author || []).map(a => [a.given, a.family].filter(Boolean).join(' ')).join(', ');
             const year    = (m.published || m['published-print'] || m['published-online'] || {})['date-parts']?.[0]?.[0] || '';
             const journal = (m['container-title'] || [''])[0];
-            const url     = m.URL || '';
 
-            // Deteksi tipe sumber dari CrossRef
-            const typeMap = {
-                'journal-article':    'journal',
-                'book':               'book',
-                'book-chapter':       'book',
-                'proceedings-article':'conference',
-                'monograph':          'book',
-                'dissertation':       'thesis',
-            };
+            const typeMap = { 'journal-article':'journal', 'book':'book', 'proceedings-article':'conference', 'dissertation':'thesis' };
             const detected = typeMap[m.type] || 'journal';
 
-            // Isi kolom utama
             document.getElementById('input-author').value = authors;
             document.getElementById('input-title').value  = (m.title || [''])[0];
             document.getElementById('input-year').value   = year;
             document.getElementById('input-source').value = journal;
 
-            // Switch tipe
-            typeBtns.forEach(b => { b.classList.remove('active'); if (b.dataset.type === detected) b.classList.add('active'); });
+            sourceBtns.forEach(b => { b.classList.remove('active'); if (b.dataset.type === detected) b.classList.add('active'); });
             currentSourceType = detected;
             updateFormFields();
 
-            // Isi kolom spesifik setelah form di-update
             const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
             setVal('input-volume', m.volume || '');
             setVal('input-issue',  m.issue  || '');
             setVal('input-pages',  m.page   || '');
-            setVal('input-url',    url);
+            setVal('input-url',    m.URL || '');
 
             btnDoiFetch.innerHTML = '<i class=\'bx bx-check\'></i> Berhasil!';
             setTimeout(() => { btnDoiFetch.innerHTML = '<i class=\'bx bx-bolt-circle\'></i> Auto-Fill'; }, 2500);
-
         } catch (err) {
-            alert(`Gagal mengambil data.\nPastikan DOI valid dan koneksi internet tersedia.\n\nError: ${err.message}`);
+            alert(`Gagal mengambil data DOI.`);
             btnDoiFetch.innerHTML = '<i class=\'bx bx-bolt-circle\'></i> Auto-Fill';
         }
         btnDoiFetch.disabled = false;
     }
 
     /* ====================================================
-       HISTORY MANAGEMENT
+       HISTORY & EXPORT
     ==================================================== */
     function saveHistory(text, type, rawData, sourceType, ieeeNum) {
         citationHistory.unshift({ id: Date.now(), text, type, rawData, sourceType, ieeeNum });
@@ -392,106 +347,58 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         citationHistory.forEach((item, idx) => {
             const isIEEE   = item.type === 'IEEE';
-            const numLabel = isIEEE && item.ieeeNum ? `<span class="history-num">[${item.ieeeNum}]</span>` : '';
             historyList.innerHTML += `
-                <div class="history-item ${isIEEE ? '' : 'apa-style'}">
-                    <div class="history-item-body">
-                        <div class="history-item-header">
-                            <span class="history-badge ${isIEEE ? 'badge-ieee' : 'badge-apa'}">${item.type}</span>
-                            ${numLabel}
-                            <span class="history-source-type">${getSourceTypeLabel(item.sourceType || 'journal')}</span>
-                        </div>
+                <div class="history-item">
+                    <div style="flex: 1;">
+                        <span class="history-badge" style="color: ${isIEEE ? '#569CD6' : '#C586C0'}; border-color: ${isIEEE ? '#569CD6' : '#C586C0'};">${item.type}</span>
                         <p class="history-text" id="hist-text-${idx}">${item.text}</p>
                     </div>
-                    <div class="history-actions">
-                        <button class="btn icon-btn" onclick="copyHistory(${idx})" title="Salin"><i class='bx bx-copy'></i></button>
-                        <button class="btn icon-btn icon-btn-danger" onclick="deleteHistory(${idx})" title="Hapus"><i class='bx bx-trash'></i></button>
-                    </div>
+                    <button class="btn icon-btn" onclick="copyHistory(${idx})" title="Salin"><i class='bx bx-copy'></i></button>
                 </div>`;
         });
     }
 
-    function getSourceTypeLabel(type) {
-        const map = { journal: '📰 Jurnal', book: '📚 Buku', conference: '🎤 Konferensi', website: '🌐 Website', thesis: '🎓 Skripsi/Tesis' };
-        return map[type] || '📄 Lainnya';
-    }
-
     function updateHistoryCount() {
-        historyCount.textContent = citationHistory.length > 0 ? ` (${citationHistory.length})` : '';
+        historyCount.textContent = citationHistory.length > 0 ? `(${citationHistory.length})` : '';
     }
 
-    // Global functions dipanggil dari onclick attribute
     window.copyHistory = idx => {
-        navigator.clipboard.writeText(document.getElementById(`hist-text-${idx}`).innerText)
-            .then(() => alert('Sitasi disalin ke clipboard!'));
-    };
-
-    window.deleteHistory = idx => {
-        if (!confirm('Hapus sitasi ini dari riwayat?')) return;
-        citationHistory.splice(idx, 1);
-        localStorage.setItem('citation_history', JSON.stringify(citationHistory));
-        renderHistory();
-        updateHistoryCount();
+        navigator.clipboard.writeText(document.getElementById(`hist-text-${idx}`).innerText).then(() => alert('Tersalin!'));
     };
 
     btnClearHistory.addEventListener('click', () => {
-        if (!confirm('Hapus semua riwayat sitasi? Tindakan ini tidak dapat dibatalkan.')) return;
+        if (!confirm('Hapus semua riwayat?')) return;
         citationHistory = [];
-        ieeeCounter     = 0;
+        ieeeCounter = 0;
         localStorage.removeItem('citation_history');
         localStorage.removeItem('ieee_counter');
         renderHistory();
         updateHistoryCount();
     });
 
-    /* ====================================================
-       EXPORT
-    ==================================================== */
     btnExportBibtex.addEventListener('click', () => {
-        if (!citationHistory.length) { alert('Tidak ada data untuk diekspor!'); return; }
+        if (!citationHistory.length) { alert('Kosong!'); return; }
         let bib = '';
         citationHistory.forEach((item, i) => {
-            const d    = item.rawData;
-            const key  = (d.author || 'unknown').split(/[\s,]/)[0].replace(/[^a-zA-Z]/g, '') + (d.year || '0000');
+            const d = item.rawData;
+            const key = (d.author || 'unknown').split(/[\s,]/)[0].replace(/[^a-zA-Z]/g, '') + (d.year || '0000');
             const type = { journal: '@article', book: '@book', conference: '@inproceedings', website: '@misc', thesis: '@mastersthesis' }[item.sourceType || 'journal'] || '@misc';
 
-            bib += `${type}{${key}_${i + 1},\n`;
-            bib += `  author = {${d.author || ''}},\n`;
-            bib += `  title  = {${d.title  || ''}},\n`;
-            bib += `  year   = {${d.year   || ''}},\n`;
-
+            bib += `${type}{${key}_${i + 1},\n  author = {${d.author || ''}},\n  title  = {${d.title  || ''}},\n  year   = {${d.year   || ''}},\n`;
             if (item.sourceType === 'book') {
                 bib += `  publisher = {${d.source || ''}},\n`;
-                if (d.city)    bib += `  address   = {${d.city}},\n`;
-                if (d.edition) bib += `  edition   = {${d.edition}},\n`;
-            } else if (item.sourceType === 'conference') {
-                bib += `  booktitle = {${d.source || ''}},\n`;
-                if (d.confPages)    bib += `  pages   = {${d.confPages}},\n`;
-                if (d.confLocation) bib += `  address = {${d.confLocation}},\n`;
-                const cu = d.confUrl || '';
-                if (cu) bib += `  url = {${cu}},\n`;
-            } else if (item.sourceType === 'website') {
-                bib += `  howpublished = {\\url{${d.webUrl || ''}}},\n`;
-                if (d.source) bib += `  organization = {${d.source}},\n`;
-            } else if (item.sourceType === 'thesis') {
-                bib += `  school = {${d.source     || ''}},\n`;
-                bib += `  type   = {${d.thesisType || 'Skripsi'}},\n`;
-                if (d.thesisUrl) bib += `  url = {${d.thesisUrl}},\n`;
+                if (d.city) bib += `  address = {${d.city}},\n`;
             } else {
-                // journal (default)
                 bib += `  journal = {${d.source || ''}},\n`;
-                if (d.volume) bib += `  volume  = {${d.volume}},\n`;
-                if (d.issue)  bib += `  number  = {${d.issue}},\n`;
-                if (d.pages)  bib += `  pages   = {${d.pages}},\n`;
-                if (d.url)    bib += `  url     = {${d.url}},\n`;
             }
+            if (d.url) bib += `  url = {${d.url}}\n`;
             bib += `}\n\n`;
         });
         downloadFile(bib, `references_${Date.now()}.bib`);
     });
 
     btnExportTxt.addEventListener('click', () => {
-        if (!citationHistory.length) { alert('Tidak ada data untuk diekspor!'); return; }
+        if (!citationHistory.length) { alert('Kosong!'); return; }
         const ieee = [...citationHistory].filter(i => i.type === 'IEEE').sort((a, b) => (a.ieeeNum || 0) - (b.ieeeNum || 0));
         const apa  = citationHistory.filter(i => i.type === 'APA');
         let txt    = '';
@@ -501,14 +408,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function downloadFile(content, filename) {
-        const a    = document.createElement('a');
-        a.href     = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
         a.download = filename;
         a.click();
     }
 
     /* ====================================================
-       DISPLAY & UX
+       UX (MENAMPILKAN HASIL)
     ==================================================== */
     function displayResult(text, type) {
         outputText.innerText  = text;
@@ -529,4 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 2000);
         });
     });
+
+    // Inisialisasi tampilan awal
+    updateFormFields();
 });
