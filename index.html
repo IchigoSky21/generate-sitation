@@ -4,221 +4,156 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asisten Riset - Generator Sitasi</title>
+    
+    <!-- Font Developer (Monospace) & Boxicons -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    
+    <!-- Link CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="app-container">
 
-    <header class="top-header">
-        <h1><i class='bx bxs-quote-alt-left text-primary'></i> Generator Sitasi</h1>
-        <p class="text-muted">Susun referensi standar IEEE atau APA secara otomatis untuk keperluan akademis Anda.</p>
-    </header>
+    <div class="app-container">
+        <header class="top-header">
+            <h1><i class='bx bxs-quote-alt-left'></i> Generator Sitasi</h1>
+            <p class="text-muted">Susun referensi standar IEEE atau APA secara otomatis untuk keperluan akademis Anda.</p>
+        </header>
 
-    <main class="main-content">
-
-        <!-- ===== FORM CARD ===== -->
-        <div class="card">
-            <div class="card-header">
-                <h2><i class='bx bx-edit-alt text-primary'></i> Detail Sumber Referensi</h2>
-            </div>
-
-            <!-- DOI QUICK FETCH (di luar form, utilitas) -->
-            <div class="doi-bar">
-                <label class="doi-label"><i class='bx bx-link-alt'></i> Auto-Fill via DOI </label>
-                <div class="doi-input-row">
-                    <input type="text" id="input-doi-quick" placeholder="Contoh: 10.1109/TITS.2024.1234567  kemudian tekan Enter / klik Auto-Fill">
-                    <button type="button" id="btn-doi-fetch" class="btn btn-doi"><i class='bx bx-bolt-circle'></i> Auto-Fill</button>
+        <main class="main-content">
+            <!-- Form Input Data -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class='bx bx-edit-alt'></i> Detail Sumber Referensi</h2>
                 </div>
-            </div>
-
-            <form id="citation-form">
                 
-
-                <div class="form-group" style="margin-bottom: 24px;">
-                    <label>Tipe Sumber</label>
-                     <!-- Wadah flexbox agar tombol sama rata -->
-                    <div class="source-selector">
-                        <button type="button" class="source-btn active" id="type-jurnal"><i class='bx bx-news'></i> Jurnal</button>
-                        <button type="button" class="source-btn" id="type-buku"><i class='bx bx-book'></i> Buku</button>
-                        <button type="button" class="source-btn" id="type-konferensi"><i class='bx bx-microphone'></i> Konferensi</button>
-                        <button type="button" class="source-btn" id="type-website"><i class='bx bx-globe'></i> Website</button>
-                        <button type="button" class="source-btn" id="type-skripsi"><i class='bx bx-file'></i> Skripsi/Tesis</button>
+                <!-- Fitur Auto-Fill DOI -->
+                <div class="form-group" style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px dashed var(--border);">
+                    <label for="input-doi-fetch"><i class='bx bx-link'></i> Auto-Fill via DOI</label>
+                    <div style="display: flex; gap: 12px;">
+                        <input type="text" id="input-doi-fetch" placeholder="Contoh: 10.1109/TITS.2024..." style="flex: 1;">
+                        <button type="button" id="btn-fetch-doi" class="btn btn-secondary"><i class='bx bx-bolt-circle'></i> Auto-Fill</button>
                     </div>
                 </div>
 
-                <!-- PENULIS -->
-                <div class="form-group">
-                    <label for="input-author">Nama Penulis <span class="field-hint">(pisahkan beberapa penulis dengan koma: John Smith, Jane Doe)</span></label>
-                    <input type="text" id="input-author" placeholder="Contoh: John Smith  atau  John Smith, Jane Doe, Bob Williams" required>
-                    <label for="input-org-author" class="checkbox-label">
-                        <input type="checkbox" id="input-org-author">
-                        Penulis adalah organisasi / lembaga (nama tidak diformat ulang)
-                    </label>
-                </div>
-
-                <!-- JUDUL + TAHUN -->
-                <div class="form-row">
-                    <div class="form-group" style="flex: 3;">
-                        <label for="input-title">Judul Artikel / Dokumen</label>
-                        <input type="text" id="input-title" placeholder="Masukkan judul dokumen..." required>
+                <form id="citation-form">
+                    <!-- Pemilihan Tipe Sumber -->
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label>Tipe Sumber</label>
+                        <div class="source-selector">
+                            <button type="button" class="source-btn active" data-type="jurnal"><i class='bx bx-news'></i> Jurnal</button>
+                            <button type="button" class="source-btn" data-type="buku"><i class='bx bx-book'></i> Buku</button>
+                            <button type="button" class="source-btn" data-type="konferensi"><i class='bx bx-microphone'></i> Konferensi</button>
+                            <button type="button" class="source-btn" data-type="website"><i class='bx bx-globe'></i> Website</button>
+                            <button type="button" class="source-btn" data-type="skripsi"><i class='bx bx-file'></i> Skripsi/Tesis</button>
+                        </div>
                     </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label for="input-year">Tahun Terbit</label>
-                        <input type="number" id="input-year" placeholder="2024" min="1900" max="2099" required>
+
+                    <div class="form-group">
+                        <label for="input-author">Nama Penulis (Pisahkan dengan koma: John Smith, Jane Doe)</label>
+                        <input type="text" id="input-author" placeholder="Contoh: John Smith atau J. Smith, Jane Doe" required>
+                        <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="check-org" style="width: auto; margin: 0;">
+                            <label for="check-org" style="margin: 0; color: var(--text-muted); cursor: pointer; text-transform: none;">Penulis adalah organisasi / lembaga (nama tidak diformat ulang)</label>
+                        </div>
                     </div>
-                </div>
 
-                <!-- SUMBER DINAMIS (label berubah sesuai tipe) -->
-                <div class="form-group">
-                    <label for="input-source" id="source-label">Nama Jurnal</label>
-                    <input type="text" id="input-source" placeholder="Contoh: IEEE Transactions on Neural Networks">
-                </div>
-
-                <!-- ===== OPTIONAL FIELDS: JURNAL (default tampil) ===== -->
-                <div class="optional-fields" id="fields-journal">
                     <div class="form-row">
-                        <div class="form-group" style="flex: 1;">
-                            <label for="input-volume">Volume <span class="field-hint">(Opsional)</span></label>
-                            <input type="text" id="input-volume" placeholder="Contoh: 12">
+                        <div class="form-group" style="flex: 3;">
+                            <label for="input-title">Judul Artikel / Dokumen</label>
+                            <input type="text" id="input-title" placeholder="Masukkan judul dokumen..." required>
                         </div>
                         <div class="form-group" style="flex: 1;">
-                            <label for="input-issue">Nomor Issue <span class="field-hint">(Opsional)</span></label>
+                            <label for="input-year">Tahun Terbit</label>
+                            <input type="number" id="input-year" placeholder="Contoh: 2024" required>
+                        </div>
+                    </div>
+
+                    <!-- Label dinamis berdasarkan tipe -->
+                    <div class="form-group">
+                        <label id="label-source" for="input-source">Nama Jurnal</label>
+                        <input type="text" id="input-source" placeholder="Contoh: IEEE Transactions..." required>
+                    </div>
+
+                    <!-- Kolom Spesifik Jurnal/Buku -->
+                    <div class="form-row" id="row-details">
+                        <div class="form-group" style="flex: 1;">
+                            <label id="label-vol" for="input-vol">Volume (Opsional)</label>
+                            <input type="text" id="input-vol" placeholder="Contoh: 12">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label id="label-issue" for="input-issue">Nomor Issue (Opsional)</label>
                             <input type="text" id="input-issue" placeholder="Contoh: 3">
                         </div>
                         <div class="form-group" style="flex: 1;">
-                            <label for="input-pages">Halaman <span class="field-hint">(Opsional)</span></label>
+                            <label id="label-pages" for="input-pages">Halaman (Opsional)</label>
                             <input type="text" id="input-pages" placeholder="Contoh: 45-60">
                         </div>
                     </div>
+
                     <div class="form-group">
-                        <label for="input-url">URL atau DOI <span class="field-hint">(Opsional)</span></label>
+                        <label for="input-url">URL atau DOI (Opsional)</label>
                         <input type="text" id="input-url" placeholder="https://doi.org/...">
                     </div>
-                </div>
 
-                <!-- ===== OPTIONAL FIELDS: BUKU ===== -->
-                <div class="optional-fields hidden" id="fields-book">
-                    <div class="form-row">
-                        <div class="form-group" style="flex: 2;">
-                            <label for="input-city">Kota Terbit <span class="field-hint">(Opsional)</span></label>
-                            <input type="text" id="input-city" placeholder="Contoh: New York, Jakarta">
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label for="input-edition">Edisi <span class="field-hint">(Opsional)</span></label>
-                            <input type="text" id="input-edition" placeholder="Contoh: 3rd">
-                        </div>
+                    <div class="action-buttons" style="display: flex; gap: 12px; margin-top: 24px;">
+                        <button type="button" id="btn-ieee" class="btn btn-primary"><i class='bx bx-check-double'></i> Generate IEEE</button>
+                        <button type="button" id="btn-apa" class="btn btn-secondary">Generate APA</button>
                     </div>
-                </div>
-
-                <!-- ===== OPTIONAL FIELDS: KONFERENSI ===== -->
-                <div class="optional-fields hidden" id="fields-conference">
-                    <div class="form-row">
-                        <div class="form-group" style="flex: 2;">
-                            <label for="input-conf-location">Lokasi Konferensi <span class="field-hint">(Opsional)</span></label>
-                            <input type="text" id="input-conf-location" placeholder="Contoh: Bali, Indonesia">
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label for="input-conf-pages">Halaman <span class="field-hint">(Opsional)</span></label>
-                            <input type="text" id="input-conf-pages" placeholder="Contoh: 123-130">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="input-conf-url">URL atau DOI <span class="field-hint">(Opsional)</span></label>
-                        <input type="text" id="input-conf-url" placeholder="https://doi.org/...">
-                    </div>
-                </div>
-
-                <!-- ===== OPTIONAL FIELDS: WEBSITE ===== -->
-                <div class="optional-fields hidden" id="fields-website">
-                    <div class="form-row">
-                        <div class="form-group" style="flex: 2;">
-                            <label for="input-web-url">URL <span class="field-required">* Wajib</span></label>
-                            <input type="text" id="input-web-url" placeholder="https://...">
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label for="input-access-date">Tanggal Akses <span class="field-hint">(Opsional)</span></label>
-                            <input type="date" id="input-access-date">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ===== OPTIONAL FIELDS: SKRIPSI/TESIS ===== -->
-                <div class="optional-fields hidden" id="fields-thesis">
-                    <div class="form-row">
-                        <div class="form-group" style="flex: 1;">
-                            <label for="input-thesis-type">Tingkat</label>
-                            <select id="input-thesis-type" class="form-select">
-                                <option value="Skripsi">Skripsi (S1)</option>
-                                <option value="Tesis">Tesis (S2)</option>
-                                <option value="Disertasi">Disertasi (S3)</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="flex: 2;">
-                            <label for="input-thesis-url">URL Repository <span class="field-hint">(Opsional)</span></label>
-                            <input type="text" id="input-thesis-url" placeholder="https://repository.university.ac.id/...">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TOMBOL AKSI -->
-                <div class="action-buttons">
-                    <button type="button" id="btn-ieee" class="btn btn-primary"><i class='bx bx-check-double'></i> Generate IEEE</button>
-                    <button type="button" id="btn-apa" class="btn btn-secondary"><i class='bx bx-text'></i> Generate APA</button>
-                    <button type="button" id="btn-reset" class="btn btn-ghost"><i class='bx bx-reset'></i> Reset Form</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- ===== RESULT CARD ===== -->
-        <div class="card hidden" id="result-card">
-            <div class="card-header">
-                <h2><i class='bx bx-check-circle text-success'></i> Hasil Sitasi (<span id="citation-type-label"></span>)</h2>
+                </form>
             </div>
-            <div class="result-box">
-                <p id="output-text"></p>
-                <button id="btn-copy" class="btn icon-btn" title="Salin teks">
-                    <i class='bx bx-copy'></i>
-                </button>
-            </div>
-        </div>
 
-        <!-- ===== HISTORY CARD ===== -->
-        <div class="card">
-            <div class="card-header">
-                <h2><i class='bx bx-history text-primary'></i> Riwayat Daftar Pustaka<span id="history-count" class="history-count-badge"></span></h2>
-                <div class="card-header-actions">
-                    <button id="btn-export-bibtex" class="btn btn-success btn-sm"><i class='bx bxs-file-export'></i> BibTeX</button>
-                    <button id="btn-export-txt" class="btn btn-success btn-sm"><i class='bx bx-file-blank'></i> .TXT</button>
-                    <button id="btn-clear-history" class="btn btn-secondary btn-sm"><i class='bx bx-trash'></i> Kosongkan</button>
+            <!-- Area Hasil -->
+            <div class="card hidden" id="result-card" style="margin-top: 24px;">
+                <div class="card-header">
+                    <h2><i class='bx bx-terminal text-success'></i> Output Sitasi (<span id="citation-type-label"></span>)</h2>
+                </div>
+                <div class="result-box">
+                    <p id="output-text" style="font-size: 0.95rem; line-height: 1.6; margin-right: 16px;"></p>
+                    <button id="btn-copy" class="btn icon-btn" title="Salin teks">
+                        <i class='bx bx-copy'></i>
+                    </button>
                 </div>
             </div>
-            <div id="history-list" class="history-container"></div>
-        </div>
 
-        <!-- ===== POJOK LITERASI ===== -->
-        <div class="card">
-            <div class="card-header">
-                <h2><i class='bx bx-news text-primary'></i> Pojok Literasi: Mengapa Sitasi Penting?</h2>
+            <!-- Area Riwayat -->
+            <div class="card" style="margin-top: 24px;">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <h2><i class='bx bx-history text-primary'></i> Riwayat Daftar Pustaka</h2>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button id="btn-export-txt" class="btn btn-secondary" style="padding: 8px 12px; font-size: 0.8rem;"><i class='bx bx-file-blank'></i> Export TXT</button>
+                        <button id="btn-export-bibtex" class="btn btn-success" style="padding: 8px 12px; font-size: 0.8rem;"><i class='bx bxs-file-export'></i> Export BibTeX</button>
+                        <button id="btn-clear-history" class="btn btn-danger" style="padding: 8px 12px; font-size: 0.8rem; background: #C53030; color: white; border: none;"><i class='bx bx-trash'></i> Kosongkan</button>
+                    </div>
+                </div>
+                <div id="history-list" class="history-container">
+                    <p class="text-muted">Belum ada riwayat sitasi yang disimpan.</p>
+                </div>
             </div>
-            <div class="info-content">
-                <h3>Apa itu Sitasi?</h3>
-                <p>Sitasi (kutipan) adalah penanda yang kita letakkan dalam teks untuk memberi tahu pembaca bahwa sebuah gagasan, data, atau algoritma yang kita tulis sebenarnya berasal dari sumber lain. Ini adalah bentuk penghormatan intelektual kepada peneliti atau penulis aslinya.</p>
 
-                <h3>Mengapa Kita Wajib Menulis Sitasi?</h3>
-                <ul style="padding-left: 20px; margin-bottom: 16px;">
-                    <li style="margin-bottom: 8px;"><strong>Integritas Akademik:</strong> Menghindari plagiarisme adalah aturan mutlak dalam penulisan karya ilmiah.</li>
-                    <li style="margin-bottom: 8px;"><strong>Memvalidasi Argumen:</strong> Argumen riset Anda akan jauh lebih kuat jika didukung oleh literatur pendahulu yang kredibel.</li>
-                    <li style="margin-bottom: 8px;"><strong>Jejak Penelusuran:</strong> Membantu pembaca untuk melacak sumber asli jika mereka ingin mendalami topik tersebut.</li>
-                </ul>
+            <!-- Area Edukasi -->
+            <div class="card" style="margin-top: 24px;">
+                <div class="card-header">
+                    <h2><i class='bx bx-info-circle text-primary'></i> Pojok Literasi</h2>
+                </div>
+                <div class="info-content">
+                    <h3>Apa itu Sitasi?</h3>
+                    <p>Sitasi (kutipan) adalah penanda yang kita letakkan dalam teks untuk memberi tahu pembaca bahwa sebuah gagasan, data, atau algoritma yang kita tulis sebenarnya berasal dari sumber lain. Ini adalah bentuk penghormatan intelektual kepada peneliti atau penulis aslinya.</p>
+                    
+                    <h3>Mengapa Kita Wajib Menulis Sitasi?</h3>
+                    <ul style="padding-left: 20px; margin-bottom: 16px; margin-top: 8px;">
+                        <li style="margin-bottom: 8px;"><strong>Integritas Akademik:</strong> Menghindari plagiarisme adalah aturan mutlak dalam dunia akademik dan profesional.</li>
+                        <li style="margin-bottom: 8px;"><strong>Memvalidasi Argumen:</strong> Argumen riset Anda akan jauh lebih kuat jika didukung oleh literatur pendahulu yang kredibel.</li>
+                        <li style="margin-bottom: 8px;"><strong>Jejak Penelusuran:</strong> Membantu pembaca melacak sumber asli jika mereka ingin mendalami topik tersebut.</li>
+                    </ul>
 
-                <h3>Perbedaan Format IEEE vs APA</h3>
-                <p><strong>IEEE</strong> adalah standar utama pada bidang Software Engineering, Machine Learning, dan Computer Vision. Ciri utamanya: nomor urut dalam kurung siku [1], nama penulis menggunakan inisial (J. Smith), dan judul artikel menggunakan Sentence case. <strong>APA</strong> menggunakan format penulis-tahun (Smith, 2024) dan lebih umum pada ilmu sosial, psikologi, dan humaniora.</p>
+                    <h3>Standar Format IEEE vs APA</h3>
+                    <p>Gaya <strong>IEEE</strong> adalah standar utama yang digunakan dalam publikasi jurnal bidang <em>Software Engineering</em>, <em>Machine Learning</em>, dan <em>Computer Science</em>. Ciri utamanya menggunakan nomor urut dalam kurung siku, misal [1]. Sementara itu, gaya <strong>APA</strong> lebih sering ditemui pada literatur ilmu sosial, bisnis, dan humaniora dengan format (Penulis, Tahun).</p>
+                </div>
             </div>
-        </div>
+        </main>
+    </div>
 
-    </main>
-</div>
-<script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
