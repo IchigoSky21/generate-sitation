@@ -33,16 +33,17 @@
             </div>
 
             <form id="citation-form">
+                
 
-                <!-- TIPE SUMBER -->
-                <div class="form-group">
-                    <label>Tipe Sumber <span class="keyboard-hint">Ctrl + ↵ = Generate IEEE</span></label>
-                    <div class="type-selector" id="type-selector">
-                        <button type="button" class="type-btn active" data-type="journal"><i class='bx bx-news'></i> Jurnal</button>
-                        <button type="button" class="type-btn" data-type="book"><i class='bx bx-book'></i> Buku</button>
-                        <button type="button" class="type-btn" data-type="conference"><i class='bx bx-microphone'></i> Konferensi</button>
-                        <button type="button" class="type-btn" data-type="website"><i class='bx bx-globe'></i> Website</button>
-                        <button type="button" class="type-btn" data-type="thesis"><i class='bx bx-certification'></i> Skripsi/Tesis</button>
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label>Tipe Sumber</label>
+                     <!-- Wadah flexbox agar tombol sama rata -->
+                    <div class="source-selector">
+                        <button type="button" class="source-btn active" id="type-jurnal"><i class='bx bx-news'></i> Jurnal</button>
+                        <button type="button" class="source-btn" id="type-buku"><i class='bx bx-book'></i> Buku</button>
+                        <button type="button" class="source-btn" id="type-konferensi"><i class='bx bx-microphone'></i> Konferensi</button>
+                        <button type="button" class="source-btn" id="type-website"><i class='bx bx-globe'></i> Website</button>
+                        <button type="button" class="source-btn" id="type-skripsi"><i class='bx bx-file'></i> Skripsi/Tesis</button>
                     </div>
                 </div>
 
