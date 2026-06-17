@@ -1,26 +1,32 @@
-/* Mengambil font retro dari Google Fonts */
+/* ====================================================
+   IMPORTS
+==================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Playfair+Display:wght@700&display=swap');
 
+/* ====================================================
+   VARIABEL
+==================================================== */
 :root {
-    --bg-main: #EFE9D9; /* Warna Kertas Tua */
-    --surface: #F8F4E6; /* Kertas Cerah */
-    --text-dark: #2C1E16; /* Tinta Cokelat Tua */
-    --text-muted: #5E4B3C;
-    --primary: #8C3A3A; /* Merah Bata (Vintage) */
-    --primary-hover: #6B2B2B;
-    --secondary: #D4C4A8;
-    --secondary-hover: #C2B092;
-    --success: #3E5A44; /* Hijau Pudar */
-    --border: #2C1E16;
-    --shadow-retro: 6px 6px 0px #2C1E16; /* Bayangan Blok Klasik */
+    --bg-main:          #EFE9D9;
+    --surface:          #F8F4E6;
+    --text-dark:        #2C1E16;
+    --text-muted:       #5E4B3C;
+    --primary:          #8C3A3A;
+    --primary-hover:    #6B2B2B;
+    --secondary:        #D4C4A8;
+    --secondary-hover:  #C2B092;
+    --success:          #3E5A44;
+    --border:           #2C1E16;
+    --shadow-retro:     6px 6px 0px #2C1E16;
 }
 
-* {
-    margin: 0;
-    padding: 0;
+/* ====================================================
+   RESET & BASE
+==================================================== */
+*, *::before, *::after {
+    margin: 0; padding: 0;
     box-sizing: border-box;
-    /* Font bawaan seperti mesin tik */
-    font-family: 'Courier Prime', Courier, monospace; 
+    font-family: 'Courier Prime', Courier, monospace;
 }
 
 body {
@@ -29,16 +35,15 @@ body {
     display: flex;
     justify-content: center;
     padding: 40px 20px;
-    /* Pola titik-titik retro di latar belakang */
     background-image: radial-gradient(#D4C4A8 1px, transparent 1px);
-    background-size: 20px 20px; 
+    background-size: 20px 20px;
 }
 
-.app-container {
-    width: 100%;
-    max-width: 800px;
-}
+.app-container { width: 100%; max-width: 820px; }
 
+/* ====================================================
+   HEADER
+==================================================== */
 .top-header {
     text-align: center;
     margin-bottom: 30px;
@@ -47,27 +52,36 @@ body {
 }
 
 .top-header h1 {
-    font-family: 'Playfair Display', serif; /* Font koran klasik */
+    font-family: 'Playfair Display', serif;
     font-size: 2.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    color: var(--text-dark);
     letter-spacing: 1px;
 }
 
 .text-primary { color: var(--primary); }
 .text-success { color: var(--success); }
-.text-muted { color: var(--text-muted); font-size: 0.95rem; margin-top: 8px; font-weight: bold;}
+.text-muted   { color: var(--text-muted); font-size: 0.95rem; margin-top: 8px; font-weight: bold; }
 
+/* ====================================================
+   CARD
+==================================================== */
 .card {
     background: var(--surface);
-    border: 3px solid var(--border); /* Garis tepi tebal */
+    border: 3px solid var(--border);
     padding: 30px;
     box-shadow: var(--shadow-retro);
     margin-bottom: 30px;
-    position: relative;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .card-header h2 {
@@ -79,43 +93,201 @@ body {
     gap: 8px;
     border-bottom: 2px solid var(--border);
     padding-bottom: 10px;
+    flex: 1;
+    min-width: 200px;
+    flex-wrap: wrap;
 }
 
+.card-header-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+/* ====================================================
+   DOI FETCH BAR
+==================================================== */
+.doi-bar {
+    background: var(--bg-main);
+    border: 2px dashed var(--border);
+    padding: 16px;
+    margin-bottom: 24px;
+}
+
+.doi-label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.doi-input-row { display: flex; gap: 8px; }
+.doi-input-row input { flex: 1; font-size: 0.875rem; padding: 10px 14px; }
+
+.btn-doi {
+    background: var(--text-dark) !important;
+    color: var(--surface) !important;
+    white-space: nowrap;
+    font-size: 0.85rem !important;
+    padding: 10px 16px !important;
+    letter-spacing: 0.5px;
+}
+.btn-doi:hover { background: var(--primary) !important; }
+.btn-doi:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; box-shadow: 4px 4px 0 var(--border) !important; }
+
+/* ====================================================
+   TIPE SUMBER SELECTOR
+==================================================== */
+.type-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.type-btn {
+    padding: 9px 14px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    font-family: 'Courier Prime', Courier, monospace;
+    font-weight: 700;
+    font-size: 0.78rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 3px 3px 0 var(--border);
+    transition: all 0.1s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.type-btn:hover  { background: var(--secondary); }
+.type-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--border); }
+
+.type-btn.active {
+    background: var(--primary);
+    color: #FFF;
+    border-color: var(--primary-hover);
+    box-shadow: 3px 3px 0 var(--primary-hover);
+}
+
+/* ====================================================
+   FORM
+==================================================== */
 .form-group {
     margin-bottom: 16px;
     display: flex;
     flex-direction: column;
 }
 
-.form-row {
-    display: flex;
-    gap: 16px;
-}
+.form-row { display: flex; gap: 16px; }
 
 label {
     font-weight: 700;
     margin-bottom: 8px;
     text-transform: uppercase;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     letter-spacing: 1px;
 }
 
-input {
+.field-hint {
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.field-required {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: none;
+}
+
+.keyboard-hint {
+    display: inline-block;
+    font-size: 0.65rem;
+    background: var(--border);
+    color: var(--surface);
+    padding: 2px 7px;
+    margin-left: 8px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+    text-transform: uppercase;
+}
+
+/* Input global (teks, angka, tanggal) */
+input, .form-select {
     padding: 12px 16px;
     border: 2px solid var(--border);
     background: var(--surface);
     font-size: 1rem;
-    outline: none;
-    transition: 0.1s;
+    font-family: 'Courier Prime', Courier, monospace;
     font-weight: 700;
+    color: var(--text-dark);
+    outline: none;
+    width: 100%;
+    transition: background 0.1s, box-shadow 0.1s;
 }
 
-/* Efek saat form diisi */
-input:focus {
+input:focus, .form-select:focus {
     background: #FFFFFF;
-    box-shadow: 4px 4px 0px var(--secondary);
+    box-shadow: 4px 4px 0 var(--secondary);
 }
 
+/* Override untuk checkbox agar tidak ikut gaya input text */
+input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+    padding: 0 !important;
+    flex-shrink: 0;
+    cursor: pointer;
+    accent-color: var(--primary);
+    box-shadow: none !important;
+}
+
+/* Select dropdown dengan panah custom */
+.form-select {
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%232C1E16' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+}
+
+/* Checkbox label (inline row) */
+.checkbox-label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text-muted);
+    cursor: pointer;
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+/* ====================================================
+   OPTIONAL FIELDS
+==================================================== */
+.optional-fields { margin-top: 2px; }
+
+/* ====================================================
+   TOMBOL
+==================================================== */
 .btn {
     padding: 12px 24px;
     border: 2px solid var(--border);
@@ -126,122 +298,171 @@ input:focus {
     justify-content: center;
     gap: 8px;
     font-size: 0.95rem;
-    box-shadow: 4px 4px 0px var(--border);
+    font-family: 'Courier Prime', Courier, monospace;
+    box-shadow: 4px 4px 0 var(--border);
     transition: all 0.1s;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-/* Efek tuts mesin tik ditekan */
-.btn:active {
-    transform: translate(4px, 4px);
-    box-shadow: 0px 0px 0px var(--border);
+.btn:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--border); }
+
+.btn-primary             { background: var(--primary); color: #FFF; }
+.btn-primary:hover       { background: var(--primary-hover); }
+
+.btn-secondary           { background: var(--secondary); color: var(--text-dark); }
+.btn-secondary:hover     { background: var(--secondary-hover); }
+
+.btn-success             { background: var(--success); color: #FFF; }
+.btn-success:hover       { background: #2E4534; }
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border-color: var(--text-muted);
+    box-shadow: 4px 4px 0 var(--text-muted);
+}
+.btn-ghost:hover { background: var(--secondary); color: var(--text-dark); border-color: var(--border); box-shadow: 4px 4px 0 var(--border); }
+
+/* Tombol kecil untuk header history */
+.btn-sm {
+    padding: 8px 12px !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.5px;
 }
 
-.btn-primary { background: var(--primary); color: #FFF; }
-.btn-primary:hover { background: var(--primary-hover); }
-
-.btn-secondary { background: var(--secondary); color: var(--text-dark); }
-.btn-secondary:hover { background: var(--secondary-hover); }
-
-.btn-success { background: var(--success); color: #FFF; }
-.btn-success:hover { background: #2E4534; }
-
-.icon-btn {
-    background: var(--secondary);
-    color: var(--text-dark);
-    padding: 10px;
-    font-size: 1.2rem;
-}
+.icon-btn { background: var(--secondary); color: var(--text-dark); padding: 10px; font-size: 1.1rem; }
 .icon-btn:hover { background: var(--secondary-hover); }
 .icon-btn.success { background: var(--success); color: #FFF; }
 
+/* Tombol hapus (merah) */
+.icon-btn-danger { background: #FDE8E8; color: #7B1E1E; }
+.icon-btn-danger:hover { background: #7B1E1E; color: #FFF; }
+
+.action-buttons { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+
 .hidden { display: none !important; }
 
-/* === TAMPILAN HASIL DAN RIWAYAT === */
+/* ====================================================
+   HASIL SITASI
+==================================================== */
 .result-box {
-    display: flex; 
-    justify-content: space-between; 
-    align-items: flex-start; 
-    background: #FFFFFF; 
-    padding: 16px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    background: #FFFFFF;
+    padding: 16px;
     border: 2px solid var(--border);
-    box-shadow: inset 4px 4px 0px rgba(0,0,0,0.05); /* Efek kertas menjorok ke dalam */
+    box-shadow: inset 4px 4px 0 rgba(0,0,0,0.05);
+}
+
+#output-text {
+    font-size: 1rem;
+    line-height: 1.75;
+    flex: 1;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* ====================================================
+   RIWAYAT
+==================================================== */
+.history-count-badge {
+    font-family: 'Courier Prime', Courier, monospace;
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-weight: 700;
 }
 
 .history-container {
-    max-height: 300px;
+    max-height: 380px;
     overflow-y: auto;
     border: 2px solid var(--border);
     padding: 10px;
     background: #FFFFFF;
-    box-shadow: inset 4px 4px 0px rgba(0,0,0,0.05);
+    box-shadow: inset 4px 4px 0 rgba(0,0,0,0.05);
 }
 
-/* Desain Scrollbar bergaya retro */
-.history-container::-webkit-scrollbar { width: 14px; }
+.history-container::-webkit-scrollbar       { width: 14px; }
 .history-container::-webkit-scrollbar-track { background: var(--surface); border-left: 2px solid var(--border); }
 .history-container::-webkit-scrollbar-thumb { background: var(--border); }
 
 .history-item {
     background: var(--surface);
     padding: 16px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     border: 2px solid var(--border);
     display: flex;
-    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    box-shadow: 3px 3px 0 var(--border);
+}
+
+.history-item:last-child            { margin-bottom: 0; }
+.history-item:not(.apa-style)       { border-left: 6px solid var(--primary); }
+.history-item.apa-style             { border-left: 6px solid var(--success); }
+
+.history-item-body {
+    flex: 1;
+    min-width: 0; /* Cegah overflow teks panjang */
+}
+
+.history-item-header {
+    display: flex;
     align-items: center;
-    gap: 16px;
-    box-shadow: 3px 3px 0px var(--border);
-}
-
-.history-item.apa-style {
-    border-left: 8px solid var(--success);
-}
-.history-item:not(.apa-style) {
-    border-left: 8px solid var(--primary);
-}
-
-.history-text {
-    font-size: 0.9rem;
-    line-height: 1.6;
-    font-weight: 700;
-}
-
-.history-badge {
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 4px 8px;
-    background: var(--border);
-    color: #FFF;
+    gap: 8px;
     margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+/* Badge IEEE / APA — FIXED: warna terpisah, tidak lagi satu warna gelap */
+.history-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    color: #FFF;
     display: inline-block;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+.badge-ieee { background: var(--primary); }
+.badge-apa  { background: var(--success); }
 
-/* Responsivitas Layar HP */
-@media (max-width: 600px) {
-    .form-row { flex-direction: column; gap: 0; }
-    .action-buttons { flex-direction: column; }
-    .btn { width: 100%; margin-bottom: 10px; }
-    .card { padding: 20px; box-shadow: 4px 4px 0px var(--border); }
-}
-/* --- Tambahan Baru: Efek Tombol Aktif & Pojok Literasi --- */
-
-/* Efek saat tombol sedang dipilih/aktif */
-.btn.active {
-    transform: translate(4px, 4px);
-    box-shadow: 0px 0px 0px var(--border);
-    background: var(--text-dark) !important;
-    color: var(--surface) !important;
-    border-color: var(--text-dark);
+.history-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--primary);
 }
 
-/* Gaya Tipografi untuk Pojok Literasi (Gaya Koran) */
+.history-source-type {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.history-text {
+    font-size: 0.875rem;
+    line-height: 1.7;
+    font-weight: 700;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.history-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+/* ====================================================
+   POJOK LITERASI
+==================================================== */
 .info-content h3 {
     font-family: 'Playfair Display', serif;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     margin-top: 20px;
     margin-bottom: 10px;
     color: var(--primary);
@@ -251,9 +472,28 @@ input:focus {
     display: inline-block;
 }
 
+.info-content h3:first-child { margin-top: 0; }
+
 .info-content p, .info-content li {
-    font-size: 0.95rem;
-    line-height: 1.7;
+    font-size: 0.93rem;
+    line-height: 1.75;
     font-weight: 700;
     color: var(--text-muted);
+}
+
+/* ====================================================
+   RESPONSIF
+==================================================== */
+@media (max-width: 600px) {
+    .top-header h1  { font-size: 1.8rem; }
+    .card           { padding: 20px; box-shadow: 4px 4px 0 var(--border); }
+    .form-row       { flex-direction: column; gap: 0; }
+    .action-buttons { flex-direction: column; }
+    .btn            { width: 100%; }
+    .type-selector  { gap: 6px; }
+    .type-btn       { font-size: 0.72rem; padding: 8px 10px; }
+    .doi-input-row  { flex-direction: column; }
+    .card-header h2 { font-size: 1.25rem; }
+    .card-header-actions { width: 100%; }
+    .card-header-actions .btn { flex: 1; }
 }
