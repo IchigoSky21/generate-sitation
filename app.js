@@ -137,8 +137,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!raw.author) { alert('Kolom Penulis wajib diisi!'); return false; }
         if (!raw.title)  { alert('Kolom Judul wajib diisi!'); return false; }
         if (!raw.year)   { alert('Kolom Tahun wajib diisi!'); return false; }
+    
+        // Tambahkan ini:
+        const y = parseInt(raw.year);
+        if (isNaN(y) || y < 1900 || y > 2099) {
+            alert('Tahun tidak valid! Masukkan antara 1900–2099.');
+            return false;
+        }
+    
         if (!raw.source && currentSourceType !== 'website') {
             alert(`Kolom "${sourceConfig[currentSourceType].label}" wajib diisi!`);
+            return false;
+        }
+        if (currentSourceType === 'website' && !raw.webUrl) {
+            alert('URL wajib diisi untuk sumber jenis Website!');
             return false;
         }
         return true;
@@ -346,34 +358,41 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         citationHistory.forEach((item, idx) => {
-            const isIEEE   = item.type === 'IEEE';
+            const isIEEE = item.type === 'IEEE';
+            const badgeColor = isIEEE ? '#569CD6' : '#C586C0';
+            const numLabel = isIEEE && item.ieeeNum
+                ? `<span style="color:#4EC9B0; font-size:0.9rem; font-weight:700;">[${item.ieeeNum}]</span>` : '';
             historyList.innerHTML += `
                 <div class="history-item">
-                    <div style="flex: 1;">
-                        <span class="history-badge" style="color: ${isIEEE ? '#569CD6' : '#C586C0'}; border-color: ${isIEEE ? '#569CD6' : '#C586C0'};">${item.type}</span>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
+                            <span class="history-badge" style="color:${badgeColor}; border-color:${badgeColor};">${item.type}</span>
+                            ${numLabel}
+                            <span style="font-size:0.7rem; color:var(--text-muted);">${getSourceTypeLabel(item.sourceType)}</span>
+                        </div>
                         <p class="history-text" id="hist-text-${idx}">${item.text}</p>
                     </div>
-                    <button class="btn icon-btn" onclick="copyHistory(${idx})" title="Salin"><i class='bx bx-copy'></i></button>
+                    <div style="display:flex; flex-direction:column; gap:6px; flex-shrink:0;">
+                        <button class="btn icon-btn" onclick="copyHistory(${idx})" title="Salin"><i class='bx bx-copy'></i></button>
+                        <button class="btn icon-btn" onclick="deleteHistory(${idx})" title="Hapus" style="color:#C53030; border-color:#C53030;"><i class='bx bx-trash'></i></button>
+                    </div>
                 </div>`;
         });
     }
 
-    function updateHistoryCount() {
-        historyCount.textContent = citationHistory.length > 0 ? `(${citationHistory.length})` : '';
+    function getSourceTypeLabel(type) {
+        const map = { journal:'📰 Jurnal', book:'📚 Buku', conference:'🎤 Konf.', website:'🌐 Web', thesis:'🎓 Tesis' };
+        return map[type] || '📄';
     }
 
-    window.copyHistory = idx => {
-        navigator.clipboard.writeText(document.getElementById(`hist-text-${idx}`).innerText).then(() => alert('Tersalin!'));
-    };
-
-    btnClearHistory.addEventListener('click', () => {
-        if (!confirm('Hapus semua riwayat?')) return;
-        citationHistory = [];
-        ieeeCounter = 0;
-        localStorage.removeItem('citation_history');
-        localStorage.removeItem('ieee_counter');
+    // Tambahkan juga fungsi deleteHistory sebagai global
+    window.deleteHistory = idx => {
+        if (!confirm('Hapus sitasi ini?')) return;
+         citationHistory.splice(idx, 1);
+        localStorage.setItem('citation_history', JSON.stringify(citationHistory));
         renderHistory();
         updateHistoryCount();
+    };
     });
 
     btnExportBibtex.addEventListener('click', () => {
@@ -435,6 +454,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnCopy.classList.remove('success');
             }, 2000);
         });
+    });
+   
+    document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+             e.preventDefault();
+            btnIEEE.click();
+        }
     });
 
     // Inisialisasi tampilan awal
