@@ -155,4 +155,10 @@ input:focus, select:focus {
 .info-content h3 { font-size: 1.1rem; margin-top: 16px; margin-bottom: 8px; color: var(--primary); border-bottom: 1px dashed var(--border); display: inline-block; padding-bottom: 4px; }
 .info-content p, .info-content li { font-size: 0.95rem; line-height: 1.7; color: var(--text-muted); }
 
-@media (max-width: 600px) { .form-row { flex-direction: column; gap: 0; } .action-buttons { flex-direction: column; } .btn { width: 100%; } }
+@media (max-width: 600px) { 
+   .form-row { flex-direction: column; gap: 0; } 
+   .action-buttons { flex-direction: column; } 
+   .btn { width: 100%; } 
+   .card-header { flex-direction: column; align-items: flex-start; }
+   .doi-group {flex-direction: column; }
+}
