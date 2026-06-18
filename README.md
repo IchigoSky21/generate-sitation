@@ -1,53 +1,139 @@
-# 📜 Asisten Riset: Generator Sitasi (Retro Edition)
+# 🖥️ Asisten Riset: Generator Sitasi
 
 ![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
 ![GitHub Pages](https://img.shields.io/badge/Deployed_on-GitHub_Pages-success?style=for-the-badge&logo=github)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 
-Aplikasi web statis berbasis *Client-Side* untuk manajemen dan perakitan daftar pustaka secara otomatis. Dirancang dengan antarmuka bergaya *Retro Vintage / Neobrutalism* (layaknya mesin tik klasik), web ini dibangun untuk membantu mempercepat produktivitas penyusunan referensi akademik, laporan tugas kelompok, hingga draf proposal proyek riset.
+Aplikasi web statis berbasis *Client-Side* untuk menyusun dan mengelola daftar pustaka secara otomatis. Dirancang dengan antarmuka bergaya **Developer Dark Mode** (seperti tampilan IDE / code editor), aplikasi ini dibangun untuk mempercepat produktivitas penyusunan referensi akademik — mulai dari laporan tugas kelompok, tugas akhir, hingga draf paper riset.
 
-Sangat ideal digunakan untuk perakitan sitasi pada paper riset berbasis teknologi yang membutuhkan standar ketat, seperti pada ranah *Software Engineering*, *Machine Learning*, maupun *Computer Vision*.
+Sangat ideal untuk penyusunan sitasi pada karya tulis ilmiah di bidang *Software Engineering*, *Machine Learning*, maupun *Computer Vision* yang menuntut format referensi ketat (IEEE / APA).
 
-🌐 **[Coba Aplikasi Langsung (Live Demo) Di Sini](https://ichigosky21.github.io/generate-sitation/)**
-
----
-
-## ✨ Fitur Utama (Major Update)
-
-- **⚡ DOI Auto-Fill (Integrasi CrossRef API):** Tidak perlu mengetik manual! Cukup masukkan tautan DOI jurnal, dan sistem akan menarik metadata (Penulis, Judul, Tahun, Jurnal) secara otomatis melalui metode *asynchronous fetching*.
-- **📚 Multi-Source Support:** Mendukung pembuatan sitasi dari berbagai sumber: Artikel Jurnal, Buku, Prosiding Konferensi, Skripsi/Tesis, dan Website. Formulir akan menyesuaikan secara dinamis (*Dynamic UI*) sesuai jenis sumber yang dipilih pengguna.
-- **🧠 Smart Name Parsing:** Algoritma cerdas yang mendeteksi dan mengonversi input nama penulis menjadi format baku secara otomatis (misal: mengubah "John William Smith" menjadi "J. W. Smith" untuk format IEEE, atau "Smith, J. W." untuk format APA).
-- **⏱️ Instant Generation:** Merakit sitasi standar **IEEE** dan **APA** hanya dengan satu kali klik, lengkap dengan penanda visual (indikator tombol aktif).
-- **💾 Local Storage History:** Setiap sitasi yang di-*generate* akan otomatis tersimpan di riwayat *browser* sebagai satu kesatuan daftar pustaka yang bisa diakses kapan saja.
-- **📥 Export ke BibTeX & TXT:** 
-  - Unduh format `.bib` untuk integrasi mudah dengan *Reference Manager* seperti Mendeley, Zotero, atau EndNote.
-  - Unduh format `.txt` yang sudah terstruktur rapi untuk langsung di-*copy-paste* ke laporan Microsoft Word Anda.
-- **🎨 Retro Interactive UI:** Tampilan visual klasik dengan tombol interaktif bergaya blok mekanik mesin tik.
+🌐 **[Coba Aplikasi Langsung (Live Demo)](https://ichigosky21.github.io/generate-sitation/)**
 
 ---
 
-## 🛠️ Teknologi yang Digunakan
+## ✨ Fitur Utama
 
-Proyek ini sepenuhnya dibangun secara *Native/Vanilla* tanpa *framework* eksternal untuk memastikan performa yang ringan dan struktur kode yang bersih:
-* **HTML5:** Kerangka antarmuka dan formulir semantik yang dinamis.
-* **CSS3:** Desain *custom* bergaya Neobrutalism menggunakan *CSS Variables*, *Flexbox*, dan tipografi *web fonts* klasik (Courier Prime & Playfair Display).
-* **Vanilla JavaScript:** Menggunakan `async/await` untuk pemrosesan API pihak ketiga, manipulasi *String/Array* tingkat lanjut untuk algoritma perakitan sitasi, *DOM Manipulation*, *Local Storage API*, dan pembuatan file via *Blob API*.
+| Fitur | Deskripsi |
+|---|---|
+| ⚡ **DOI Auto-Fill** | Input DOI jurnal → metadata (Penulis, Judul, Tahun, Jurnal) terisi otomatis via CrossRef API |
+| 📚 **Multi-Source Support** | Mendukung 5 jenis sumber: Jurnal, Buku, Konferensi, Website, Skripsi/Tesis |
+| 🧠 **Smart Name Parsing** | Konversi nama otomatis — "John William Smith" → "J. W. Smith" (IEEE) atau "Smith, J. W." (APA) |
+| 👥 **Multi-Author Support** | Input beberapa penulis sekaligus dengan pemisah koma; penggabungan `and` / `&` otomatis sesuai standar |
+| 🏛️ **Org Author Mode** | Opsi untuk penulis berbentuk institusi/lembaga agar nama tidak diformat ulang |
+| ⏱️ **Instant Generation** | Generate sitasi IEEE atau APA dalam satu klik; IEEE dilengkapi penomoran `[1]`, `[2]`, ... otomatis |
+| 💾 **Persistent History** | Setiap sitasi tersimpan di *Local Storage* browser dan dapat diakses kapan saja |
+| 🗑️ **Delete Per Item** | Hapus sitasi tertentu dari riwayat tanpa harus menghapus semuanya |
+| 📥 **Export BibTeX** | Unduh file `.bib` siap pakai untuk Mendeley, Zotero, atau EndNote |
+| 📄 **Export TXT** | Unduh file `.txt` terstruktur (IEEE & APA terpisah) untuk langsung di-*paste* ke Word |
+| ⌨️ **Keyboard Shortcut** | Tekan `Ctrl + Enter` untuk langsung men-*generate* format IEEE |
+| ✅ **Validasi Input** | Validasi tahun (1900–2099) dan field wajib per tipe sumber |
+
+---
+
+## 🛠️ Teknologi
+
+Proyek ini dibangun *Native/Vanilla* tanpa framework eksternal — ringan, tidak ada dependensi, dan siap dijalankan langsung dari browser.
+
+| Teknologi | Kegunaan |
+|---|---|
+| **HTML5** | Struktur antarmuka dan form semantik yang berubah dinamis sesuai tipe sumber |
+| **CSS3** | Dark IDE theme menggunakan CSS Variables, Flexbox, dan JetBrains Mono web font |
+| **Vanilla JavaScript** | `async/await` untuk DOI fetching, string manipulation untuk algoritma sitasi, DOM API, Local Storage API, Blob API |
+| **CrossRef REST API** | Sumber data metadata DOI publik (`api.crossref.org`) |
+| **BoxIcons** | Library ikon via CDN (`unpkg.com/boxicons`) |
+| **JetBrains Mono** | Typeface monospace via Google Fonts |
 
 ---
 
 ## 🚀 Cara Penggunaan
 
 ### Akses via Web (Rekomendasi)
-1. Buka tautan **[Live Demo](https://ichigosky21.github.io/generate-sitation/)**.
-2. (Opsional) Masukkan kode DOI jurnal dan klik ikon pencarian untuk melakukan *auto-fill* data.
-3. Atau, pilih jenis referensi (Jurnal, Buku, dll) pada *dropdown* dan masukkan data secara manual.
-4. Klik tombol **Generate IEEE** atau **Generate APA**.
-5. Hasil akan muncul di kotak bawah dan langsung tersimpan di bagian Riwayat.
-6. Kumpulkan seluruh referensi Anda, lalu klik **Export BibTeX** atau **Export .TXT** sesuai kebutuhan.
+1. Buka **[Live Demo](https://ichigosky21.github.io/generate-sitation/)**
+2. **(Opsional — cara cepat)** Tempel kode DOI jurnal di kolom *Auto-Fill via DOI*, tekan Enter atau klik **Auto-Fill** — semua field terisi otomatis
+3. **(Atau manual)** Pilih tipe sumber (Jurnal / Buku / Konferensi / Website / Skripsi), lalu isi form yang muncul
+4. Klik **Generate IEEE** atau **Generate APA** (atau tekan `Ctrl + Enter` untuk IEEE)
+5. Hasil sitasi muncul di bawah — klik ikon salin untuk menyalinnya ke clipboard
+6. Ulangi untuk semua referensi yang dibutuhkan; semua tersimpan otomatis di bagian **Riwayat**
+7. Klik **Export .TXT** untuk unduh semua sitasi siap pakai, atau **Export BibTeX** untuk format `.bib`
 
 ### Menjalankan Secara Lokal
-Karena proyek ini adalah file statis, Anda tidak memerlukan instalasi *server* lokal (*backend*).
-1. *Clone repository* ini:
+Tidak perlu server lokal — cukup buka file HTML langsung di browser.
+
 ```bash
-   git clone [https://github.com/ichigosky21/generate-sitation.git](https://github.com/ichigosky21/generate-sitation.git)
+# 1. Clone repository ini
+git clone https://github.com/IchigoSky21/generate-sitation.git
+
+# 2. Masuk ke folder
+cd generate-sitation
+
+# 3. Buka index.html di browser
+#    Klik dua kali file index.html, atau gunakan Live Server di VS Code
+```
+
+> **Catatan:** Fitur DOI Auto-Fill memerlukan koneksi internet aktif karena memanggil CrossRef API secara langsung dari browser.
+
+---
+
+## 📂 Struktur File
+
+```
+generate-sitation/
+├── index.html      # Struktur antarmuka dan semua elemen form
+├── style.css       # Dark IDE theme — CSS Variables, layout, komponen visual
+├── app.js          # Logika utama: generator sitasi, DOI fetch, history, export
+├── README.md       # Dokumentasi proyek
+└── LICENSE         # MIT License
+```
+
+---
+
+## 📋 Format Sitasi yang Dihasilkan
+
+### IEEE — Jurnal
+```
+[1] J. W. Smith and A. Doe, "Deep learning for pothole detection," IEEE Trans. Intell. Transp. Syst., vol. 25, no. 3, pp. 100–115, 2024. Available: https://doi.org/...
+```
+
+### APA — Jurnal
+```
+Smith, J. W. & Doe, A. (2024). Deep learning for pothole detection. IEEE Transactions on Intelligent Transportation Systems, 25(3), 100–115. https://doi.org/...
+```
+
+### IEEE — Prosiding Konferensi
+```
+[2] J. W. Smith, "Real-time object detection using YOLO," in Proc. International Conference on Computer Vision (ICCV), Bali, Indonesia, 2024, pp. 55–62.
+```
+
+### APA — Buku
+```
+Goodfellow, I., Bengio, Y., & Courville, A. (2016). Deep learning. MIT Press.
+```
+
+---
+
+## 🤝 Berkontribusi
+
+Kontribusi sangat disambut! Untuk melaporkan bug atau mengusulkan fitur baru:
+
+1. **Fork** repository ini
+2. Buat branch baru: `git checkout -b fitur/nama-fitur`
+3. Commit perubahan: `git commit -m 'Tambah: deskripsi singkat'`
+4. Push ke branch: `git push origin fitur/nama-fitur`
+5. Buka **Pull Request**
+
+Untuk bug yang ditemukan, silakan buka [Issue baru](https://github.com/IchigoSky21/generate-sitation/issues).
+
+---
+
+## 📄 Lisensi
+
+Proyek ini dilisensikan di bawah **MIT License** — bebas digunakan, dimodifikasi, dan didistribusikan untuk keperluan apapun selama mencantumkan atribusi aslinya. Lihat file [LICENSE](LICENSE) untuk detail lengkap.
+
+---
+
+<div align="center">
+  <sub>Dibuat dengan ☕ untuk mahasiswa yang lelah menyusun daftar pustaka secara manual.</sub>
+</div>
