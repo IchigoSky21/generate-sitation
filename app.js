@@ -22,12 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let citationHistory   = JSON.parse(localStorage.getItem('citation_history')) || [];
     let ieeeCounter       = parseInt(localStorage.getItem('ieee_counter') || '0');
 
-    renderHistory();
-    updateHistoryCount();
-    updateFormFields();
-
     /* ====================================================
-       SOURCE TYPE
+       SOURCE TYPE & CONFIGURATION
     ==================================================== */
     const sourceConfig = {
         journal:    { label: 'Nama Jurnal',                       placeholder: 'Contoh: IEEE Transactions on Neural Networks' },
@@ -322,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ====================================================
-       HISTORY
+       HISTORY & EXPORT
     ==================================================== */
     function saveHistory(text, type, rawData, sourceType, ieeeNum) {
         citationHistory.unshift({ id: Date.now(), text, type, rawData, sourceType, ieeeNum });
@@ -392,11 +388,8 @@ document.addEventListener('DOMContentLoaded', () => {
         updateHistoryCount();
     });
 
-    /* ====================================================
-       EXPORT
-    ==================================================== */
     btnExportBibtex.addEventListener('click', () => {
-        if (!citationHistory.length) { alert('Tidak ada data untuk diekspor!'); return; }
+        if (!citationHistory.length) { alert('Kosong!'); return; }
         let bib = '';
         citationHistory.forEach((item, i) => {
             const d    = item.rawData;
@@ -465,4 +458,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-}); // ← Satu-satunya penutup DOMContentLoaded yang benar
+    // INISIALISASI AKHIR
+    renderHistory();
+    updateHistoryCount();
+    updateFormFields();
+
+}); // ← Penutup DOMContentLoaded
