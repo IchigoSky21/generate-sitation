@@ -1,49 +1,46 @@
-const CACHE_NAME = 'citation-generator-v1';
+// KITA UBAH NAMA CACHE MENJADI V2 UNTUK MEMAKSA BROWSER MENGHAPUS YANG LAMA
+const CACHE_NAME = 'sitasi-cache-v2';
 const urlsToCache = [
     './',
     './index.html',
     './style.css',
     './app.js',
-    './manifest.json'
+    './manifest.json',
+    'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap',
+    'https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css'
 ];
 
-// Tahap Instalasi: Menyimpan file ke dalam Cache
 self.addEventListener('install', event => {
+    // Memaksa Service Worker baru untuk langsung mengambil alih
+    self.skipWaiting();
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => {
-                console.log('Membuka cache');
-                return cache.addAll(urlsToCache);
-            })
+        caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
     );
 });
 
-// Tahap Fetch: Mengambil dari Cache saat offline
 self.addEventListener('fetch', event => {
     event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                // Jika file ada di cache, gunakan itu. Jika tidak, ambil dari internet.
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request);
-            })
+        caches.match(event.request).then(response => {
+            return response || fetch(event.request);
+        })
     );
 });
 
-// Tahap Aktivasi: Membersihkan Cache lama jika ada pembaruan versi
 self.addEventListener('activate', event => {
     const cacheWhitelist = [CACHE_NAME];
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames.map(cacheName => {
+                    // Menghapus cache versi lama (v1)
                     if (cacheWhitelist.indexOf(cacheName) === -1) {
                         return caches.delete(cacheName);
                     }
                 })
             );
+        }).then(() => {
+            // Memastikan semua tab menggunakan cache terbaru
+            return self.clients.claim();
         })
     );
 });
