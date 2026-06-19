@@ -20,7 +20,7 @@ Sangat ideal untuk penyusunan sitasi pada karya tulis ilmiah di bidang *Software
 |---|---|
 | ⚡ **DOI Auto-Fill** | Input DOI jurnal → metadata (Penulis, Judul, Tahun, Jurnal) terisi otomatis via CrossRef API |
 | 📚 **Multi-Source Support** | Mendukung 5 jenis sumber: Jurnal, Buku, Konferensi, Website, Skripsi/Tesis |
-| 🧠 **Smart Name Parsing** | Konversi nama otomatis — "John William Smith" → "J. W. Smith" (IEEE) atau "Smith, J. W." (APA) |
+| 🧠 **Smart Name Parsing** | Konversi nama otomatis "John William Smith" → "J. W. Smith" (IEEE) atau "Smith, J. W." (APA) |
 | 👥 **Multi-Author Support** | Input beberapa penulis sekaligus dengan pemisah koma; penggabungan `and` / `&` otomatis sesuai standar |
 | 🏛️ **Org Author Mode** | Opsi untuk penulis berbentuk institusi/lembaga agar nama tidak diformat ulang |
 | ⏱️ **Instant Generation** | Generate sitasi IEEE atau APA dalam satu klik; IEEE dilengkapi penomoran `[1]`, `[2]`, ... otomatis |
@@ -52,15 +52,15 @@ Proyek ini dibangun *Native/Vanilla* tanpa framework eksternal -> ringan, tidak 
 
 ### Akses via Web (Rekomendasi)
 1. Buka **[Live Demo](https://ichigosky21.github.io/generate-sitation/)**
-2. **(Opsional — cara cepat)** Tempel kode DOI jurnal di kolom *Auto-Fill via DOI*, tekan Enter atau klik **Auto-Fill** — semua field terisi otomatis
+2. **(Opsional cara cepat)** Tempel kode DOI jurnal di kolom *Auto-Fill via DOI*, tekan Enter atau klik **Auto-Fill** semua field terisi otomatis
 3. **(Atau manual)** Pilih tipe sumber (Jurnal / Buku / Konferensi / Website / Skripsi), lalu isi form yang muncul
 4. Klik **Generate IEEE** atau **Generate APA** (atau tekan `Ctrl + Enter` untuk IEEE)
-5. Hasil sitasi muncul di bawah — klik ikon salin untuk menyalinnya ke clipboard
+5. Hasil sitasi muncul di bawah klik ikon salin untuk menyalinnya ke clipboard
 6. Ulangi untuk semua referensi yang dibutuhkan; semua tersimpan otomatis di bagian **Riwayat**
 7. Klik **Export .TXT** untuk unduh semua sitasi siap pakai, atau **Export BibTeX** untuk format `.bib`
 
 ### Menjalankan Secara Lokal
-Tidak perlu server lokal — cukup buka file HTML langsung di browser.
+Tidak perlu server lokal cukup buka file HTML langsung di browser.
 
 ```bash
 # 1. Clone repository ini
