@@ -6,7 +6,7 @@
 ![GitHub Pages](https://img.shields.io/badge/Deployed_on-GitHub_Pages-success?style=for-the-badge&logo=github)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 
-Aplikasi web statis berbasis *Client-Side* untuk menyusun dan mengelola daftar pustaka secara otomatis. Dirancang dengan antarmuka bergaya **Developer Dark Mode** (seperti tampilan IDE / code editor), aplikasi ini dibangun untuk mempercepat produktivitas penyusunan referensi akademik — mulai dari laporan tugas kelompok, tugas akhir, hingga draf paper riset.
+Aplikasi web statis berbasis *Client-Side* untuk menyusun dan mengelola daftar pustaka secara otomatis. Dirancang dengan antarmuka bergaya **Developer Dark Mode** (seperti tampilan IDE / code editor), aplikasi ini dibangun untuk mempercepat produktivitas penyusunan referensi akademik mulai dari laporan tugas kelompok, tugas akhir, hingga draf paper riset.
 
 Sangat ideal untuk penyusunan sitasi pada karya tulis ilmiah di bidang *Software Engineering*, *Machine Learning*, maupun *Computer Vision* yang menuntut format referensi ketat (IEEE / APA).
 
@@ -35,7 +35,7 @@ Sangat ideal untuk penyusunan sitasi pada karya tulis ilmiah di bidang *Software
 
 ## 🛠️ Teknologi
 
-Proyek ini dibangun *Native/Vanilla* tanpa framework eksternal — ringan, tidak ada dependensi, dan siap dijalankan langsung dari browser.
+Proyek ini dibangun *Native/Vanilla* tanpa framework eksternal -> ringan, tidak ada dependensi, dan siap dijalankan langsung dari browser.
 
 | Teknologi | Kegunaan |
 |---|---|
