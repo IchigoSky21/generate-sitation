@@ -23,14 +23,129 @@ document.addEventListener('DOMContentLoaded', () => {
     let ieeeCounter       = parseInt(localStorage.getItem('ieee_counter') || '0');
 
     /* ====================================================
-       SOURCE TYPE & CONFIGURATION
+       TOAST NOTIFICATION SYSTEM
+       Menggantikan semua alert() di seluruh aplikasi.
+       Penggunaan: toast('Pesan', 'success' | 'error' | 'warning' | 'info', durasi_ms)
+    ==================================================== */
+    function toast(message, type = 'info', duration = 3500, subtitle = '') {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            document.body.appendChild(container);
+        }
+
+        const iconMap = {
+            success: 'bx bx-check-circle',
+            error:   'bx bx-x-circle',
+            warning: 'bx bx-error',
+            info:    'bx bx-info-circle',
+        };
+
+        const el = document.createElement('div');
+        el.className = `toast toast-${type}`;
+        el.innerHTML = `
+            <i class="${iconMap[type] || iconMap.info} toast-icon" aria-hidden="true"></i>
+            <div class="toast-body">
+                <div class="toast-title">${message}</div>
+                ${subtitle ? `<div class="toast-sub">${subtitle}</div>` : ''}
+            </div>
+            <button class="toast-close" aria-label="Tutup notifikasi">×</button>
+            <div class="toast-progress" style="animation-duration:${duration}ms"></div>
+        `;
+
+        container.appendChild(el);
+
+        const dismiss = () => {
+            clearTimeout(timer);
+            el.classList.add('removing');
+            el.addEventListener('animationend', () => el.remove(), { once: true });
+        };
+
+        const timer = setTimeout(dismiss, duration);
+        el.querySelector('.toast-close').addEventListener('click', dismiss);
+        return el;
+    }
+
+    /* ====================================================
+       CONFIRM DIALOG
+       Menggantikan semua confirm() di seluruh aplikasi.
+       Async — kembalikan Promise<boolean>.
+       Penggunaan: const ok = await showConfirm(title, message, confirmLabel, type)
+    ==================================================== */
+    function showConfirm(title, message, confirmLabel = 'Hapus', type = 'danger') {
+        return new Promise(resolve => {
+            let overlay = document.getElementById('confirm-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'confirm-overlay';
+                overlay.setAttribute('role', 'dialog');
+                overlay.setAttribute('aria-modal', 'true');
+                overlay.innerHTML = `
+                    <div class="confirm-box">
+                        <div class="confirm-header">
+                            <div class="confirm-icon-wrap confirm-icon-${type}" id="conf-icon-wrap">
+                                <i class="bx bx-trash" id="conf-icon" aria-hidden="true"></i>
+                            </div>
+                            <div>
+                                <div class="confirm-title" id="conf-title"></div>
+                                <div class="confirm-message" id="conf-msg"></div>
+                            </div>
+                        </div>
+                        <div class="confirm-divider"></div>
+                        <div class="confirm-actions">
+                            <button class="btn btn-secondary" id="conf-cancel">Batal</button>
+                            <button class="btn btn-danger"    id="conf-ok"></button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+            }
+
+            // Update konten setiap kali dipanggil
+            const iconWrap = document.getElementById('conf-icon-wrap');
+            const icon     = document.getElementById('conf-icon');
+            iconWrap.className = `confirm-icon-wrap confirm-icon-${type}`;
+            icon.className = type === 'danger' ? 'bx bx-trash' : 'bx bx-error';
+
+            document.getElementById('conf-title').textContent = title;
+            document.getElementById('conf-msg').textContent   = message;
+            document.getElementById('conf-ok').textContent    = confirmLabel;
+
+            function close(result) {
+                overlay.classList.remove('visible');
+                overlay.addEventListener('transitionend', () => {
+                    overlay.style.display = 'none';
+                    resolve(result);
+                }, { once: true });
+            }
+
+            document.getElementById('conf-ok').onclick     = () => close(true);
+            document.getElementById('conf-cancel').onclick = () => close(false);
+            overlay.onclick = e => { if (e.target === overlay) close(false); };
+
+            // Keyboard: Escape = batal, Enter = konfirmasi
+            const keyHandler = e => {
+                if (e.key === 'Escape') { document.removeEventListener('keydown', keyHandler); close(false); }
+                if (e.key === 'Enter')  { document.removeEventListener('keydown', keyHandler); close(true);  }
+            };
+            document.addEventListener('keydown', keyHandler);
+
+            overlay.style.display = 'flex';
+            requestAnimationFrame(() => overlay.classList.add('visible'));
+            document.getElementById('conf-ok').focus();
+        });
+    }
+
+    /* ====================================================
+       SOURCE TYPE CONFIGURATION
     ==================================================== */
     const sourceConfig = {
-        journal:    { label: 'Nama Jurnal',                       placeholder: 'Contoh: IEEE Transactions on Neural Networks' },
-        book:       { label: 'Nama Penerbit (Publisher)',          placeholder: 'Contoh: Springer, O\'Reilly, Gramedia' },
-        conference: { label: 'Nama Konferensi / Prosiding',       placeholder: 'Contoh: International Conference on Machine Learning (ICML)' },
+        journal:    { label: 'Nama Jurnal',                        placeholder: 'Contoh: IEEE Transactions on Neural Networks' },
+        book:       { label: 'Nama Penerbit (Publisher)',           placeholder: 'Contoh: Springer, O\'Reilly, Gramedia' },
+        conference: { label: 'Nama Konferensi / Prosiding',        placeholder: 'Contoh: International Conference on Machine Learning (ICML)' },
         website:    { label: 'Nama Situs / Organisasi (Opsional)', placeholder: 'Contoh: Towards Data Science, Medium' },
-        thesis:     { label: 'Nama Universitas',                  placeholder: 'Contoh: Binus University, Universitas Indonesia' },
+        thesis:     { label: 'Nama Universitas',                   placeholder: 'Contoh: Binus University, Universitas Indonesia' },
     };
 
     sourceBtns.forEach(btn => {
@@ -91,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ====================================================
-       FORM DATA
+       FORM DATA & VALIDASI
     ==================================================== */
     function getVal(id) {
         const el = document.getElementById(id);
@@ -121,18 +236,31 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    // Semua alert() validasi → toast error
     function validate(raw) {
-        if (!raw.author) { alert('Kolom Penulis wajib diisi!'); return false; }
-        if (!raw.title)  { alert('Kolom Judul wajib diisi!'); return false; }
-        if (!raw.year)   { alert('Kolom Tahun wajib diisi!'); return false; }
+        if (!raw.author) {
+            toast('Kolom Penulis wajib diisi!', 'error');
+            return false;
+        }
+        if (!raw.title) {
+            toast('Kolom Judul wajib diisi!', 'error');
+            return false;
+        }
+        if (!raw.year) {
+            toast('Kolom Tahun wajib diisi!', 'error');
+            return false;
+        }
         const y = parseInt(raw.year);
-        if (isNaN(y) || y < 1900 || y > 2099) { alert('Tahun tidak valid! Masukkan antara 1900–2099.'); return false; }
+        if (isNaN(y) || y < 1900 || y > 2099) {
+            toast('Tahun tidak valid!', 'error', 4000, 'Masukkan tahun antara 1900–2099.');
+            return false;
+        }
         if (!raw.source && currentSourceType !== 'website') {
-            alert(`Kolom "${sourceConfig[currentSourceType].label}" wajib diisi!`);
+            toast(`Kolom "${sourceConfig[currentSourceType].label}" wajib diisi!`, 'error');
             return false;
         }
         if (currentSourceType === 'website' && !raw.webUrl) {
-            alert('URL wajib diisi untuk sumber jenis Website!');
+            toast('URL wajib diisi untuk sumber jenis Website!', 'error');
             return false;
         }
         return true;
@@ -263,7 +391,10 @@ document.addEventListener('DOMContentLoaded', () => {
     btnReset.addEventListener('click', () => {
         document.getElementById('citation-form').reset();
         if (doiInput) doiInput.value = '';
-        sourceBtns.forEach(b => { b.classList.remove('active'); if (b.dataset.type === 'journal') b.classList.add('active'); });
+        sourceBtns.forEach(b => {
+            b.classList.remove('active');
+            if (b.dataset.type === 'journal') b.classList.add('active');
+        });
         currentSourceType = 'journal';
         updateFormFields();
         resultCard.classList.add('hidden');
@@ -271,54 +402,77 @@ document.addEventListener('DOMContentLoaded', () => {
         btnAPA.classList.remove('active-format');
     });
 
+    // Ctrl+Enter → Generate IEEE
     document.addEventListener('keydown', e => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); btnIEEE.click(); }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            btnIEEE.click();
+        }
     });
 
     /* ====================================================
        DOI AUTO-FETCH
+       alert() → toast warning/error/success
     ==================================================== */
     btnDoiFetch.addEventListener('click', fetchDOI);
     doiInput.addEventListener('keydown', e => { if (e.key === 'Enter') fetchDOI(); });
 
     async function fetchDOI() {
         let val = doiInput.value.trim();
-        if (!val) { alert('Tempel DOI terlebih dahulu!'); return; }
+        if (!val) {
+            // alert('Tempel DOI terlebih dahulu!') → toast warning
+            toast('Kolom DOI kosong!', 'warning', 3000, 'Tempel kode DOI terlebih dahulu lalu coba lagi.');
+            doiInput.focus();
+            return;
+        }
         val = val.replace(/^https?:\/\/(dx\.)?doi\.org\//i, '').replace(/^doi:\s*/i, '');
+
         btnDoiFetch.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Memuat...';
         btnDoiFetch.disabled  = true;
+
         try {
             const res = await fetch(`https://api.crossref.org/works/${encodeURIComponent(val)}`);
-            if (!res.ok) throw new Error('DOI tidak ditemukan');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const { message: m } = await res.json();
+
             const authors  = (m.author || []).map(a => [a.given, a.family].filter(Boolean).join(' ')).join(', ');
             const year     = (m.published || m['published-print'] || m['published-online'] || {})['date-parts']?.[0]?.[0] || '';
             const journal  = (m['container-title'] || [''])[0];
-            const typeMap  = { 'journal-article':'journal', 'book':'book', 'proceedings-article':'conference', 'dissertation':'thesis' };
+            const typeMap  = { 'journal-article':'journal','book':'book','proceedings-article':'conference','dissertation':'thesis' };
             const detected = typeMap[m.type] || 'journal';
+
             document.getElementById('input-author').value = authors;
             document.getElementById('input-title').value  = (m.title || [''])[0];
             document.getElementById('input-year').value   = year;
             document.getElementById('input-source').value = journal;
+
             sourceBtns.forEach(b => { b.classList.remove('active'); if (b.dataset.type === detected) b.classList.add('active'); });
             currentSourceType = detected;
             updateFormFields();
+
             const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
             setVal('input-volume', m.volume || '');
             setVal('input-issue',  m.issue  || '');
             setVal('input-pages',  m.page   || '');
             setVal('input-url',    m.URL    || '');
+
             btnDoiFetch.innerHTML = '<i class=\'bx bx-check\'></i> Berhasil!';
+
+            // Notifikasi sukses DOI fetch
+            toast('Data DOI berhasil dimuat!', 'success', 3000, `${(m.title || [''])[0].slice(0, 60)}...`);
+
             setTimeout(() => { btnDoiFetch.innerHTML = '<i class=\'bx bx-bolt-circle\'></i> Auto-Fill'; }, 2500);
+
         } catch (err) {
-            alert('Gagal mengambil data DOI. Pastikan DOI valid dan koneksi internet tersedia.');
+            // alert('Gagal...') → toast error
+            toast('Gagal memuat data DOI', 'error', 5000, 'Pastikan DOI valid dan koneksi internet tersedia.');
             btnDoiFetch.innerHTML = '<i class=\'bx bx-bolt-circle\'></i> Auto-Fill';
         }
         btnDoiFetch.disabled = false;
     }
 
     /* ====================================================
-       HISTORY & EXPORT
+       HISTORY MANAGEMENT
     ==================================================== */
     function saveHistory(text, type, rawData, sourceType, ieeeNum) {
         citationHistory.unshift({ id: Date.now(), text, type, rawData, sourceType, ieeeNum });
@@ -334,9 +488,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         citationHistory.forEach((item, idx) => {
-            const isIEEE     = item.type === 'IEEE';
+            const isIEEE   = item.type === 'IEEE';
             const badgeColor = isIEEE ? '#569CD6' : '#C586C0';
-            const numLabel   = isIEEE && item.ieeeNum
+            const numLabel = isIEEE && item.ieeeNum
                 ? `<span style="color:#4EC9B0;font-size:0.9rem;font-weight:700;">[${item.ieeeNum}]</span>` : '';
             historyList.innerHTML += `
                 <div class="history-item">
@@ -350,7 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
                         <button class="btn icon-btn" onclick="copyHistory(${idx})" title="Salin"><i class='bx bx-copy'></i></button>
-                        <button class="btn icon-btn" onclick="deleteHistory(${idx})" title="Hapus" style="color:#C53030;border-color:#C53030;"><i class='bx bx-trash'></i></button>
+                        <button class="btn icon-btn" onclick="deleteHistory(${idx})" title="Hapus" style="color:#8C3A3A;border-color:#8C3A3A;"><i class='bx bx-trash'></i></button>
                     </div>
                 </div>`;
         });
@@ -365,31 +519,56 @@ document.addEventListener('DOMContentLoaded', () => {
         historyCount.textContent = citationHistory.length > 0 ? `(${citationHistory.length})` : '';
     }
 
+    // alert('Tersalin!') → toast success
     window.copyHistory = idx => {
-        navigator.clipboard.writeText(document.getElementById(`hist-text-${idx}`).innerText)
-            .then(() => alert('Tersalin!'));
+        const text = document.getElementById(`hist-text-${idx}`)?.innerText;
+        if (!text) return;
+        navigator.clipboard.writeText(text)
+            .then(() => toast('Sitasi disalin ke clipboard!', 'success', 2500));
     };
 
-    window.deleteHistory = idx => {
-        if (!confirm('Hapus sitasi ini?')) return;
+    // confirm('Hapus sitasi ini?') → showConfirm()
+    window.deleteHistory = async idx => {
+        const ok = await showConfirm(
+            'Hapus sitasi ini?',
+            'Sitasi akan dihapus dari riwayat. Tindakan ini tidak dapat dibatalkan.',
+            'Hapus'
+        );
+        if (!ok) return;
         citationHistory.splice(idx, 1);
         localStorage.setItem('citation_history', JSON.stringify(citationHistory));
         renderHistory();
         updateHistoryCount();
+        toast('Sitasi dihapus dari riwayat.', 'info', 2500);
     };
 
-    btnClearHistory.addEventListener('click', () => {
-        if (!confirm('Hapus semua riwayat?')) return;
+    // confirm('Hapus semua riwayat?') → showConfirm()
+    btnClearHistory.addEventListener('click', async () => {
+        const ok = await showConfirm(
+            'Kosongkan semua riwayat?',
+            'Seluruh sitasi yang tersimpan akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.',
+            'Kosongkan'
+        );
+        if (!ok) return;
         citationHistory = [];
         ieeeCounter     = 0;
         localStorage.removeItem('citation_history');
         localStorage.removeItem('ieee_counter');
         renderHistory();
         updateHistoryCount();
+        toast('Semua riwayat berhasil dihapus.', 'info', 3000);
     });
 
+    /* ====================================================
+       EXPORT
+       alert() kosong → toast warning | sukses → toast success
+    ==================================================== */
     btnExportBibtex.addEventListener('click', () => {
-        if (!citationHistory.length) { alert('Kosong!'); return; }
+        if (!citationHistory.length) {
+            // alert('Kosong!') → toast warning
+            toast('Tidak ada sitasi untuk diekspor!', 'warning', 3000, 'Generate minimal satu sitasi terlebih dahulu.');
+            return;
+        }
         let bib = '';
         citationHistory.forEach((item, i) => {
             const d    = item.rawData;
@@ -416,16 +595,22 @@ document.addEventListener('DOMContentLoaded', () => {
             bib += `}\n\n`;
         });
         downloadFile(bib, `references_${Date.now()}.bib`);
+        toast('File BibTeX berhasil diunduh!', 'success', 3000, `${citationHistory.length} entri referensi diekspor.`);
     });
 
     btnExportTxt.addEventListener('click', () => {
-        if (!citationHistory.length) { alert('Tidak ada data untuk diekspor!'); return; }
+        if (!citationHistory.length) {
+            // alert('Kosong!') → toast warning
+            toast('Tidak ada sitasi untuk diekspor!', 'warning', 3000, 'Generate minimal satu sitasi terlebih dahulu.');
+            return;
+        }
         const ieee = [...citationHistory].filter(i => i.type === 'IEEE').sort((a, b) => (a.ieeeNum || 0) - (b.ieeeNum || 0));
         const apa  = citationHistory.filter(i => i.type === 'APA');
         let txt    = '';
         if (ieee.length) { txt += '=== DAFTAR PUSTAKA (IEEE) ===\n\n'; ieee.forEach(i => { txt += i.text + '\n\n'; }); }
         if (apa.length)  { txt += '\n=== DAFTAR PUSTAKA (APA) ===\n\n'; apa.forEach(i => { txt += i.text + '\n\n'; }); }
         downloadFile(txt, `references_${Date.now()}.txt`);
+        toast('File TXT berhasil diunduh!', 'success', 3000, `${ieee.length} IEEE + ${apa.length} APA sitasi diekspor.`);
     });
 
     function downloadFile(content, filename) {
@@ -436,7 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ====================================================
-       DISPLAY & COPY
+       DISPLAY & COPY HASIL SITASI
     ==================================================== */
     function displayResult(text, type) {
         outputText.innerText   = text;
@@ -458,7 +643,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // INISIALISASI AKHIR
+    /* ====================================================
+       INISIALISASI
+    ==================================================== */
     renderHistory();
     updateHistoryCount();
     updateFormFields();
