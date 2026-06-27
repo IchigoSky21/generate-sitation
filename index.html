@@ -23,20 +23,23 @@
     <meta property="twitter:image" content="https://ichigosky21.github.io/generate-sitation/preview.png">
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#6B3A1F">
+    <meta name="theme-color" content="#6B3A1F" id="meta-theme-color">
     <link rel="apple-touch-icon" href="icon-192.png">
     
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="sitemap" type="application/xml" title="Sitemap"
-          href="/generate-sitation/sitemap.xml">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/generate-sitation/sitemap.xml">
 </head>
 <body>
 
     <div class="app-container">
-        <header class="top-header">
-            <h1><i class='bx bxs-quote-alt-left'></i> Generator Sitasi</h1>
+        <header class="top-header" style="position: relative;">
+            <button id="btn-theme-toggle" class="btn icon-btn" style="position: absolute; right: 0; top: 0; border-radius: 50%; padding: 12px;" title="Ganti Tema">
+                <i class='bx bx-moon'></i>
+            </button>
+            
+            <h1><i class='bx bxs-quote-alt-left' style="color: var(--header-icon);"></i> Generator Sitasi</h1>
             <p class="text-muted">Susun referensi standar IEEE atau APA secara otomatis untuk keperluan akademis Anda.</p>
         </header>
 
@@ -159,41 +162,4 @@
                     <h2><i class='bx bx-history text-primary'></i> Riwayat Daftar Pustaka <span id="history-count" style="color: var(--text-muted);"></span></h2>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                         <button id="btn-export-txt" class="btn btn-secondary" style="padding: 8px 12px; font-size: 0.8rem;"><i class='bx bx-file-blank'></i> .TXT</button>
-                        <button id="btn-export-bibtex" class="btn btn-success" style="padding: 8px 12px; font-size: 0.8rem;"><i class='bx bxs-file-export'></i> BibTeX</button>
-                        <button id="btn-clear-history" class="btn btn-secondary" style="padding: 8px 12px; font-size: 0.8rem; background: #C53030; color: white; border: none;"><i class='bx bx-trash'></i> Kosongkan</button>
-                    </div>
-                </div>
-                <div id="history-list" class="history-container"></div>
-            </div>
-
-            <div class="card" style="margin-top: 24px;">
-                <div class="card-header">
-                    <h2><i class='bx bx-info-circle text-primary'></i> Pojok Literasi</h2>
-                </div>
-                <div class="info-content">
-                    <h3>Apa itu Sitasi?</h3>
-                    <p>Sitasi (kutipan) adalah penanda dalam teks untuk memberi tahu pembaca bahwa sebuah gagasan, data, atau algoritma yang kita tulis berasal dari sumber lain. Ini adalah bentuk penghormatan intelektual.</p>
-                    <h3>Standar Format IEEE vs APA</h3>
-                    <p>Gaya <strong>IEEE</strong> adalah standar utama yang digunakan dalam bidang <em>Software Engineering</em> dan <em>Computer Science</em> dengan penanda nomor kurung siku [1]. Gaya <strong>APA</strong> lebih sering ditemui pada ilmu sosial dengan format (Penulis, Tahun).</p>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <script src="app.js"></script>
-    
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker berjalan lancar pada scope: ', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('ServiceWorker gagal didaftarkan: ', error);
-                    });
-            });
-        }
-    </script>
-</body>
-</html>
+                        <button id="btn-export-bibtex" class="btn btn-success" style="padding: 8px 12px; font-size: 0.
