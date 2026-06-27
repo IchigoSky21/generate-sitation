@@ -18,6 +18,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const doiInput        = document.getElementById('input-doi-quick');
     const btnDoiFetch     = document.getElementById('btn-doi-fetch');
 
+    /* ====================================================
+       DARK/LIGHT THEME TOGGLE
+    ==================================================== */
+    const themeToggleBtn = document.getElementById('btn-theme-toggle');
+    const themeIcon      = themeToggleBtn ? themeToggleBtn.querySelector('i') : null;
+    const metaThemeColor = document.getElementById('meta-theme-color');
+
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('app_theme', theme);
+        
+        if (themeIcon) {
+            if (theme === 'dark') {
+                themeIcon.className = 'bx bx-sun';
+                if(metaThemeColor) metaThemeColor.setAttribute('content', '#1E1E1E');
+            } else {
+                themeIcon.className = 'bx bx-moon';
+                if(metaThemeColor) metaThemeColor.setAttribute('content', '#6B3A1F');
+            }
+        }
+    }
+
+    // Muat tema yang tersimpan di LocalStorage atau gunakan 'light' sebagai bawaan
+    const savedTheme = localStorage.getItem('app_theme') || 'light';
+    setTheme(savedTheme);
+
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            setTheme(currentTheme === 'light' ? 'dark' : 'light');
+        });
+    }
+
+    /* ====================================================
+       STATE VARIABLES
+    ==================================================== */
     let currentSourceType = 'journal';
     let citationHistory   = JSON.parse(localStorage.getItem('citation_history')) || [];
     let ieeeCounter       = parseInt(localStorage.getItem('ieee_counter') || '0');
@@ -142,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ==================================================== */
     const sourceConfig = {
         journal:    { label: 'Nama Jurnal',                        placeholder: 'Contoh: IEEE Transactions on Neural Networks' },
-        book:       { label: 'Nama Penerbit (Publisher)',           placeholder: 'Contoh: Springer, O\'Reilly, Gramedia' },
+        book:       { label: 'Nama Penerbit (Publisher)',          placeholder: 'Contoh: Springer, O\'Reilly, Gramedia' },
         conference: { label: 'Nama Konferensi / Prosiding',        placeholder: 'Contoh: International Conference on Machine Learning (ICML)' },
         website:    { label: 'Nama Situs / Organisasi (Opsional)', placeholder: 'Contoh: Towards Data Science, Medium' },
         thesis:     { label: 'Nama Universitas',                   placeholder: 'Contoh: Binus University, Universitas Indonesia' },
