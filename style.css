@@ -1,26 +1,95 @@
 /* =========================================================
-   TEMA: LIBRARY CARD CATALOG
+   TEMA UTAMA (CSS VARIABLES MAPPING)
 ========================================================= */
-@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
+/* 1. LIGHT MODE (LIBRARY CARD CATALOG) - DEFAULT */
 :root {
-    --bg-main: #F3E9D2; /* Aged paper / Kertas tua */
-    --surface: #FDFBF7; /* Warna kartu katalog bersih */
-    --text-dark: #2C1810; /* Cokelat sangat gelap / Tinta tua */
-    --text-muted: #6B3A1F; /* Cokelat Mahoni */
+    --bg-main: #F3E9D2; 
+    --surface: #FDFBF7; 
+    --text-dark: #2C1810; 
+    --text-muted: #6B3A1F; 
     --primary: #6B3A1F; 
     --primary-hover: #4A2714;
-    --secondary: #E3D5BA; /* Warna folder manila */
+    --secondary: #E3D5BA; 
     --secondary-hover: #D4C4A3;
-    --success: #D4863A; /* Oranye Karamel klasik */
+    --success: #D4863A; 
     --border: #C8B69A;
     --radius-lg: 6px;
     --radius-md: 4px; 
+    
+    /* Font dan Ornamen Spesifik Light */
+    --main-font: 'Lora', serif;
+    --bg-pattern: repeating-linear-gradient(45deg, rgba(200, 182, 154, 0.05) 0px, rgba(200, 182, 154, 0.05) 2px, transparent 2px, transparent 4px);
+    --header-border: 2px dashed var(--border);
+    --header-icon: var(--success);
+    --shadow-card: 2px 2px 8px rgba(44, 24, 16, 0.08);
+    --history-bg: repeating-linear-gradient(transparent, transparent 29px, rgba(200, 182, 154, 0.3) 30px);
+    
+    /* Tombol Tipe Sumber Aktif */
+    --btn-active-bg: var(--surface);
+    --btn-active-color: var(--success);
+    --btn-active-shadow: 0 2px 4px rgba(212, 134, 58, 0.1);
+
+    /* Warna Notifikasi Toast & Confirm Dialog */
+    --color-success: #3E5A44;
+    --color-error: #8C3A3A;
+    --color-warn: #D4863A;
+    --color-info: #6B3A1F;
+    --bg-error-light: rgba(140, 58, 58, 0.12);
+    --bg-warn-light: rgba(212, 134, 58, 0.12);
+    
+    --overlay-bg: rgba(44, 24, 16, 0.45);
+    --btn-danger-bg: #8C3A3A;
+    --btn-danger-hover: #6B2B2B;
 }
 
+/* 2. DARK MODE (DARK IDE / VS CODE) */
+[data-theme="dark"] {
+    --bg-main: #121212; 
+    --surface: #1E1E1E; 
+    --text-dark: #D4D4D4; 
+    --text-muted: #858585; 
+    --primary: #0E639C; 
+    --primary-hover: #1177BB;
+    --secondary: #2D2D2D; 
+    --secondary-hover: #3D3D3D;
+    --success: #6A9955; 
+    --border: #333333;
+    
+    /* Font dan Ornamen Spesifik Dark */
+    --main-font: 'JetBrains Mono', monospace;
+    --bg-pattern: none;
+    --header-border: 1px solid var(--border);
+    --header-icon: var(--primary);
+    --shadow-card: 0 10px 30px rgba(0,0,0,0.5);
+    --history-bg: none;
+
+    /* Tombol Tipe Sumber Aktif */
+    --btn-active-bg: transparent;
+    --btn-active-color: #4EC9B0;
+    --btn-active-shadow: 0 0 12px rgba(78, 201, 176, 0.15);
+
+    /* Warna Notifikasi Toast & Confirm Dialog */
+    --color-success: #4EC9B0;
+    --color-error: #F44747;
+    --color-warn: #DCDCAA;
+    --color-info: #569CD6;
+    --bg-error-light: rgba(244, 71, 71, 0.15);
+    --bg-warn-light: rgba(220, 220, 170, 0.15);
+    
+    --overlay-bg: rgba(0, 0, 0, 0.65);
+    --btn-danger-bg: #F44747;
+    --btn-danger-hover: #D13B3B;
+}
+
+/* =========================================================
+   STYLING GLOBAL (Beradaptasi dengan Variabel di atas)
+========================================================= */
 * {
     margin: 0; padding: 0; box-sizing: border-box;
-    font-family: 'Lora', serif; /* Font serif yang membulat dan hangat */
+    font-family: var(--main-font); 
+    /* Transisi agar perubahan tema terlihat mulus (tidak kaku) */
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
 body {
@@ -28,18 +97,16 @@ body {
     color: var(--text-dark);
     display: flex; justify-content: center;
     padding: 40px 20px;
-    /* Memberikan sedikit tekstur halus pada latar */
-    background-image: repeating-linear-gradient(45deg, rgba(200, 182, 154, 0.05) 0px, rgba(200, 182, 154, 0.05) 2px, transparent 2px, transparent 4px);
+    background-image: var(--bg-pattern);
 }
 
 .app-container { width: 100%; max-width: 820px; }
 
-.top-header { text-align: center; margin-bottom: 30px; border-bottom: 2px dashed var(--border); padding-bottom: 20px;}
+.top-header { text-align: center; margin-bottom: 30px; border-bottom: var(--header-border); padding-bottom: 20px;}
 .top-header h1 {
     font-size: 2.3rem; font-weight: 700; color: var(--text-dark);
     display: flex; justify-content: center; align-items: center; gap: 10px;
 }
-.top-header h1 i { color: var(--success); }
 
 .text-primary { color: var(--primary); }
 .text-success { color: var(--success); }
@@ -51,7 +118,7 @@ body {
     padding: 30px;
     margin-bottom: 24px;
     border: 1px solid var(--border);
-    box-shadow: 2px 2px 8px rgba(44, 24, 16, 0.08);
+    box-shadow: var(--shadow-card);
 }
 
 .card-header h2 {
@@ -75,28 +142,28 @@ input, select {
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     color: var(--text-dark);
-    font-size: 1rem; outline: none; transition: 0.2s;
+    font-size: 1rem; outline: none;
 }
 input:focus, select:focus {
     border-color: var(--success);
     box-shadow: 0 0 0 2px rgba(212, 134, 58, 0.15);
 }
 
-/* Tipe Sumber Selector (Gaya Tab Folder) */
+/* Tipe Sumber Selector */
 .source-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; width: 100%; }
 .source-btn {
     flex: 1; min-width: 120px; display: flex; align-items: center; justify-content: center;
     gap: 8px; padding: 10px 14px; background-color: var(--secondary); 
     border: 1px solid var(--border); border-radius: var(--radius-md);
-    color: var(--primary); font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: 0.2s;
+    color: var(--primary); font-size: 0.9rem; font-weight: 500; cursor: pointer;
 }
-.source-btn:hover { background-color: var(--secondary-hover); }
+.source-btn:hover { background-color: var(--secondary-hover); color: var(--text-dark); }
 .source-btn.active {
-    background-color: var(--surface) !important;
-    color: var(--success) !important; 
-    border-color: var(--success) !important;
+    background-color: var(--btn-active-bg) !important;
+    color: var(--btn-active-color) !important; 
+    border-color: var(--btn-active-color) !important;
     font-weight: 700;
-    box-shadow: 0 2px 4px rgba(212, 134, 58, 0.1);
+    box-shadow: var(--btn-active-shadow) !important;
 }
 
 /* Tombol Aksi */
@@ -104,16 +171,17 @@ input:focus, select:focus {
     padding: 12px 24px; border: 1px solid var(--border); border-radius: var(--radius-md);
     font-weight: 600; cursor: pointer; display: inline-flex;
     align-items: center; justify-content: center; gap: 8px;
-    transition: 0.2s; font-size: 0.95rem; letter-spacing: 0.5px;
+    font-size: 0.95rem; letter-spacing: 0.5px;
 }
 .btn-primary { background: var(--primary); color: var(--surface); border-color: var(--primary); }
-.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary:hover { background: var(--primary-hover); color: white;}
 .btn-secondary { background: var(--secondary); color: var(--text-dark); }
 .btn-secondary:hover { background: var(--secondary-hover); }
 .btn-success { background: var(--success); color: white; border-color: var(--success); }
-.btn-success:hover { background: #BB722D; }
+.btn-success:hover { background: var(--success); opacity: 0.8; }
 
 .btn.active-format { background: var(--primary) !important; color: var(--surface) !important; }
+[data-theme="dark"] .btn.active-format { background: transparent !important; color: #4EC9B0 !important; border-color: #4EC9B0 !important; }
 
 .icon-btn {
     background: transparent; color: var(--text-muted);
@@ -141,8 +209,7 @@ input:focus, select:focus {
     background: var(--surface); padding: 16px; border-radius: var(--radius-md);
     margin-bottom: 12px; border: 1px solid var(--border);
     display: flex; justify-content: space-between; align-items: center; gap: 16px;
-    /* Efek garis buku catatan */
-    background-image: repeating-linear-gradient(transparent, transparent 29px, rgba(200, 182, 154, 0.3) 30px);
+    background-image: var(--history-bg);
 }
 
 .history-text { font-size: 1rem; line-height: 1.8; color: var(--text-dark); }
@@ -162,206 +229,96 @@ input:focus, select:focus {
    .card-header { flex-direction: column; align-items: flex-start; }
    .doi-group {flex-direction: column; }
 }
+
 /* ===================================================
-   TOAST NOTIFICATION SYSTEM
+   TOAST NOTIFICATION (Berdaptasi dengan Tema)
 =================================================== */
 #toast-container {
-    position: fixed;
-    bottom: 28px;
-    right: 24px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column-reverse;
-    gap: 10px;
-    pointer-events: none;
-    max-width: 340px;
-    width: calc(100% - 48px);
+    position: fixed; bottom: 28px; right: 24px; z-index: 9999;
+    display: flex; flex-direction: column-reverse; gap: 10px;
+    pointer-events: none; max-width: 340px; width: calc(100% - 48px);
 }
 
 .toast {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 14px 16px 14px 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px 14px 20px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-md);
     box-shadow: 3px 3px 0px var(--border);
-    pointer-events: all;
-    position: relative;
-    overflow: hidden;
+    pointer-events: all; position: relative; overflow: hidden;
     animation: toast-in 0.22s cubic-bezier(.17,.67,.44,1) forwards;
 }
 
-/* Garis aksen warna di kiri — identik dengan style history-item */
-.toast::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 5px;
-}
+.toast::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
 
-.toast-success::before { background: #3E5A44; }
-.toast-error::before   { background: #8C3A3A; }
-.toast-warning::before { background: #D4863A; }
-.toast-info::before    { background: #6B3A1F; }
+.toast-success::before { background: var(--color-success); }
+.toast-error::before   { background: var(--color-error); }
+.toast-warning::before { background: var(--color-warn); }
+.toast-info::before    { background: var(--color-info); }
 
-.toast-icon {
-    font-size: 1.2rem;
-    flex-shrink: 0;
-    margin-top: 1px;
-}
-.toast-success .toast-icon { color: #3E5A44; }
-.toast-error   .toast-icon { color: #8C3A3A; }
-.toast-warning .toast-icon { color: #D4863A; }
-.toast-info    .toast-icon { color: #6B3A1F; }
+.toast-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+.toast-success .toast-icon { color: var(--color-success); }
+.toast-error   .toast-icon { color: var(--color-error); }
+.toast-warning .toast-icon { color: var(--color-warn); }
+.toast-info    .toast-icon { color: var(--color-info); }
 
 .toast-body { flex: 1; min-width: 0; }
-
-.toast-title {
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: var(--text-dark);
-    line-height: 1.4;
-}
-
-.toast-sub {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    margin-top: 3px;
-    line-height: 1.5;
-}
+.toast-title { font-size: 0.88rem; font-weight: 700; color: var(--text-dark); line-height: 1.4; }
+.toast-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; line-height: 1.5; }
 
 .toast-close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.1rem;
-    color: var(--text-muted);
-    line-height: 1;
-    padding: 0;
-    flex-shrink: 0;
-    opacity: 0.6;
-    box-shadow: none;
-    transition: opacity 0.15s;
+    background: none; border: none; cursor: pointer; font-size: 1.1rem;
+    color: var(--text-muted); line-height: 1; padding: 0; flex-shrink: 0;
+    opacity: 0.6; box-shadow: none;
 }
 .toast-close:hover  { opacity: 1; }
-.toast-close:active { transform: none; box-shadow: none; }
 
-/* Progress bar waktu habis */
-.toast-progress {
-    position: absolute;
-    bottom: 0; left: 0;
-    height: 2px;
-    background: var(--border);
-    animation: toast-progress linear forwards;
-}
-.toast-success .toast-progress { background: #3E5A44; }
-.toast-error   .toast-progress { background: #8C3A3A; }
-.toast-warning .toast-progress { background: #D4863A; }
-.toast-info    .toast-progress { background: #6B3A1F; }
+.toast-progress { position: absolute; bottom: 0; left: 0; height: 2px; animation: toast-progress linear forwards; }
+.toast-success .toast-progress { background: var(--color-success); }
+.toast-error   .toast-progress { background: var(--color-error); }
+.toast-warning .toast-progress { background: var(--color-warn); }
+.toast-info    .toast-progress { background: var(--color-info); }
 
 .toast.removing { animation: toast-out 0.25s ease forwards; }
 
-@keyframes toast-in {
-    from { opacity: 0; transform: translateX(20px); }
-    to   { opacity: 1; transform: translateX(0); }
-}
+@keyframes toast-in { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toast-out { from { opacity: 1; transform: translateX(0); max-height: 120px; } to { opacity: 0; transform: translateX(20px); max-height: 0; padding-top: 0; padding-bottom: 0; margin-top: -10px; } }
+@keyframes toast-progress { from { width: 100%; } to { width: 0%; } }
 
-@keyframes toast-out {
-    from { opacity: 1; transform: translateX(0); max-height: 120px; }
-    to   { opacity: 0; transform: translateX(20px); max-height: 0;
-           padding-top: 0; padding-bottom: 0; margin-top: -10px; }
-}
-
-@keyframes toast-progress {
-    from { width: 100%; }
-    to   { width: 0%; }
-}
-
-@media (max-width: 600px) {
-    #toast-container {
-        bottom: 16px;
-        right: 12px;
-        left: 12px;
-        width: auto;
-        max-width: none;
-    }
-}
+@media (max-width: 600px) { #toast-container { bottom: 16px; right: 12px; left: 12px; width: auto; max-width: none; } }
 
 /* ===================================================
-   CONFIRM DIALOG
+   CONFIRM DIALOG (Berdaptasi dengan Tema)
 =================================================== */
 #confirm-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(44, 24, 16, 0.45);
-    z-index: 10000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    opacity: 0;
-    transition: opacity 0.18s;
+    position: fixed; inset: 0; background: var(--overlay-bg); z-index: 10000;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+    opacity: 0; transition: opacity 0.18s;
 }
-
 #confirm-overlay.visible { opacity: 1; }
 
 .confirm-box {
-    background: var(--surface);
-    border: 2px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 28px 28px 22px;
-    max-width: 380px;
-    width: 100%;
+    background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius-md);
+    padding: 28px 28px 22px; max-width: 380px; width: 100%;
     box-shadow: 5px 5px 0px var(--border);
-    transform: scale(0.95) translateY(10px);
-    transition: transform 0.2s cubic-bezier(.17,.67,.44,1);
+    transform: scale(0.95) translateY(10px); transition: transform 0.2s cubic-bezier(.17,.67,.44,1);
 }
-
 #confirm-overlay.visible .confirm-box { transform: scale(1) translateY(0); }
 
 .confirm-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; }
-
 .confirm-icon-wrap {
-    width: 42px; height: 42px;
-    border-radius: var(--radius-md);
+    width: 42px; height: 42px; border-radius: var(--radius-md);
     display: flex; align-items: center; justify-content: center;
     font-size: 1.3rem; flex-shrink: 0;
 }
-.confirm-icon-danger { background: rgba(140,58,58,0.12); color: #8C3A3A; }
-.confirm-icon-warn   { background: rgba(212,134,58,0.12); color: #D4863A; }
+.confirm-icon-danger { background: var(--bg-error-light); color: var(--color-error); }
+.confirm-icon-warn   { background: var(--bg-warn-light); color: var(--color-warn); }
 
-.confirm-title {
-    font-family: 'Lora', serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: 5px;
-    line-height: 1.3;
-}
-
-.confirm-message {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    line-height: 1.65;
-}
-
-/* Divider tipis sebelum tombol — gaya kartu perpustakaan */
-.confirm-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 18px 0 16px;
-    opacity: 0.6;
-}
+.confirm-title { font-family: var(--main-font); font-size: 1.1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 5px; line-height: 1.3; }
+.confirm-message { font-size: 0.85rem; color: var(--text-muted); line-height: 1.65; }
+.confirm-divider { height: 1px; background: var(--border); margin: 18px 0 16px; opacity: 0.6; }
 
 .confirm-actions { display: flex; gap: 10px; justify-content: flex-end; }
 .confirm-actions .btn { min-width: 80px; padding: 10px 18px; font-size: 0.85rem; }
 
-/* Tombol konfirmasi berbahaya */
-.btn-danger {
-    background: #8C3A3A;
-    color: #fff;
-    border-color: #6B2B2B;
-}
-.btn-danger:hover { background: #6B2B2B; }
+.btn-danger { background: var(--btn-danger-bg); color: #fff; border-color: var(--btn-danger-bg); }
+.btn-danger:hover { background: var(--btn-danger-hover); border-color: var(--btn-danger-hover); }
