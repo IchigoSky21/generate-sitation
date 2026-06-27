@@ -1,5 +1,5 @@
 // KITA UBAH NAMA CACHE MENJADI V2 UNTUK MEMAKSA BROWSER MENGHAPUS YANG LAMA
-const CACHE_NAME = 'sitasi-cache-v3';
+const CACHE_NAME = 'sitasi-cache-v5';
 const urlsToCache = [
     './',
     './index.html',
