@@ -1,0 +1,13 @@
+# robots.txt — Generator Sitasi
+# https://ichigosky21.github.io/generate-sitation/
+
+User-agent: *
+Allow: /generate-sitation/
+
+# Blokir file aset internal (tidak perlu diindeks)
+Disallow: /generate-sitation/sw.js
+Disallow: /generate-sitation/manifest.json
+Disallow: /generate-sitation/icon-192.png
+Disallow: /generate-sitation/icon-512.png
+
+Sitemap: https://ichigosky21.github.io/generate-sitation/sitemap.xml
