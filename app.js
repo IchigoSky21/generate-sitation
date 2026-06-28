@@ -1,58 +1,30 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    const btnIEEE         = document.getElementById('btn-ieee');
-    const btnAPA          = document.getElementById('btn-apa');
-    const btnReset        = document.getElementById('btn-reset');
-    const resultCard      = document.getElementById('result-card');
-    const outputText      = document.getElementById('output-text');
-    const citTypeLabel    = document.getElementById('citation-type-label');
-    const btnCopy         = document.getElementById('btn-copy');
-    const historyList     = document.getElementById('history-list');
-    const historyCount    = document.getElementById('history-count');
-    const btnExportBibtex = document.getElementById('btn-export-bibtex');
-    const btnExportTxt    = document.getElementById('btn-export-txt');
-    const btnClearHistory = document.getElementById('btn-clear-history');
-    const sourceBtns      = document.querySelectorAll('.source-btn');
-    const sourceLabelEl   = document.getElementById('source-label');
-    const sourceInput     = document.getElementById('input-source');
-    const doiInput        = document.getElementById('input-doi-quick');
-    const btnDoiFetch     = document.getElementById('btn-doi-fetch');
-
     /* ====================================================
-       DARK/LIGHT THEME TOGGLE
+       DOM ELEMENTS
     ==================================================== */
-    const themeToggleBtn = document.getElementById('btn-theme-toggle');
-    const themeIcon      = themeToggleBtn ? themeToggleBtn.querySelector('i') : null;
-    const metaThemeColor = document.getElementById('meta-theme-color');
-
-    function setTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('app_theme', theme);
-        
-        if (themeIcon) {
-            if (theme === 'dark') {
-                themeIcon.className = 'bx bx-sun';
-                if(metaThemeColor) metaThemeColor.setAttribute('content', '#1E1E1E');
-            } else {
-                themeIcon.className = 'bx bx-moon';
-                if(metaThemeColor) metaThemeColor.setAttribute('content', '#6B3A1F');
-            }
-        }
-    }
-
-    // Muat tema yang tersimpan di LocalStorage atau gunakan 'light' sebagai bawaan
-    const savedTheme = localStorage.getItem('app_theme') || 'light';
-    setTheme(savedTheme);
-
-    if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            setTheme(currentTheme === 'light' ? 'dark' : 'light');
-        });
-    }
+    const btnIEEE          = document.getElementById('btn-ieee');
+    const btnAPA           = document.getElementById('btn-apa');
+    const btnReset         = document.getElementById('btn-reset');
+    const resultCard       = document.getElementById('result-card');
+    const outputText       = document.getElementById('output-text');
+    const citTypeLabel     = document.getElementById('citation-type-label');
+    const btnCopy          = document.getElementById('btn-copy');
+    const historyList      = document.getElementById('history-list');
+    const historyCount     = document.getElementById('history-count');
+    const btnExportBibtex  = document.getElementById('btn-export-bibtex');
+    const btnExportTxt     = document.getElementById('btn-export-txt');
+    const btnClearHistory  = document.getElementById('btn-clear-history');
+    const sourceBtns       = document.querySelectorAll('.source-btn');
+    const sourceLabelEl    = document.getElementById('source-label');
+    const sourceInput      = document.getElementById('input-source');
+    const doiInput         = document.getElementById('input-doi-quick');
+    const btnDoiFetch      = document.getElementById('btn-doi-fetch');
+    const btnThemeToggle   = document.getElementById('btn-theme-toggle');
+    const themeIcon        = document.getElementById('theme-icon');
 
     /* ====================================================
-       STATE VARIABLES
+       STATE
     ==================================================== */
     let currentSourceType = 'journal';
     let citationHistory   = JSON.parse(localStorage.getItem('citation_history')) || [];
@@ -61,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ====================================================
        TOAST NOTIFICATION SYSTEM
        Menggantikan semua alert() di seluruh aplikasi.
-       Penggunaan: toast('Pesan', 'success' | 'error' | 'warning' | 'info', durasi_ms)
+       Penggunaan: toast('Pesan', 'success'|'error'|'warning'|'info', durasi_ms, subtitle)
     ==================================================== */
     function toast(message, type = 'info', duration = 3500, subtitle = '') {
         let container = document.getElementById('toast-container');
@@ -100,13 +72,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const timer = setTimeout(dismiss, duration);
         el.querySelector('.toast-close').addEventListener('click', dismiss);
-        return el;
     }
 
     /* ====================================================
        CONFIRM DIALOG
        Menggantikan semua confirm() di seluruh aplikasi.
-       Async — kembalikan Promise<boolean>.
        Penggunaan: const ok = await showConfirm(title, message, confirmLabel, type)
     ==================================================== */
     function showConfirm(title, message, confirmLabel = 'Hapus', type = 'danger') {
@@ -120,11 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 overlay.innerHTML = `
                     <div class="confirm-box">
                         <div class="confirm-header">
-                            <div class="confirm-icon-wrap confirm-icon-${type}" id="conf-icon-wrap">
+                            <div class="confirm-icon-wrap confirm-icon-danger" id="conf-icon-wrap">
                                 <i class="bx bx-trash" id="conf-icon" aria-hidden="true"></i>
                             </div>
                             <div>
-                                <div class="confirm-title" id="conf-title"></div>
+                                <div class="confirm-title"   id="conf-title"></div>
                                 <div class="confirm-message" id="conf-msg"></div>
                             </div>
                         </div>
@@ -133,17 +103,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="btn btn-secondary" id="conf-cancel">Batal</button>
                             <button class="btn btn-danger"    id="conf-ok"></button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 document.body.appendChild(overlay);
             }
 
-            // Update konten setiap kali dipanggil
             const iconWrap = document.getElementById('conf-icon-wrap');
             const icon     = document.getElementById('conf-icon');
             iconWrap.className = `confirm-icon-wrap confirm-icon-${type}`;
-            icon.className = type === 'danger' ? 'bx bx-trash' : 'bx bx-error';
-
+            icon.className     = type === 'danger' ? 'bx bx-trash' : 'bx bx-error';
             document.getElementById('conf-title').textContent = title;
             document.getElementById('conf-msg').textContent   = message;
             document.getElementById('conf-ok').textContent    = confirmLabel;
@@ -160,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('conf-cancel').onclick = () => close(false);
             overlay.onclick = e => { if (e.target === overlay) close(false); };
 
-            // Keyboard: Escape = batal, Enter = konfirmasi
             const keyHandler = e => {
                 if (e.key === 'Escape') { document.removeEventListener('keydown', keyHandler); close(false); }
                 if (e.key === 'Enter')  { document.removeEventListener('keydown', keyHandler); close(true);  }
@@ -174,11 +140,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ====================================================
+       DARK / LIGHT MODE TOGGLE
+    ==================================================== */
+    function applyTheme(isDark) {
+        if (isDark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            if (themeIcon)      themeIcon.className = 'bx bx-sun';
+            if (btnThemeToggle) {
+                btnThemeToggle.setAttribute('aria-label', 'Ganti ke mode terang');
+                btnThemeToggle.setAttribute('title',      'Ganti ke mode terang');
+            }
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            if (themeIcon)      themeIcon.className = 'bx bx-moon';
+            if (btnThemeToggle) {
+                btnThemeToggle.setAttribute('aria-label', 'Ganti ke mode gelap');
+                btnThemeToggle.setAttribute('title',      'Ganti ke mode gelap');
+            }
+        }
+    }
+
+    // Terapkan tema tersimpan saat halaman dimuat
+    applyTheme(localStorage.getItem('gen_sitasi_theme') === 'dark');
+
+    if (btnThemeToggle) {
+        btnThemeToggle.addEventListener('click', () => {
+            const isDark    = document.documentElement.getAttribute('data-theme') === 'dark';
+            const newIsDark = !isDark;
+            applyTheme(newIsDark);
+            localStorage.setItem('gen_sitasi_theme', newIsDark ? 'dark' : 'light');
+            toast(
+                newIsDark ? 'Mode gelap aktif' : 'Mode terang aktif',
+                'info', 2000,
+                newIsDark ? 'Preferensi tersimpan otomatis.' : 'Preferensi tersimpan otomatis.'
+            );
+        });
+    }
+
+    /* ====================================================
        SOURCE TYPE CONFIGURATION
     ==================================================== */
     const sourceConfig = {
         journal:    { label: 'Nama Jurnal',                        placeholder: 'Contoh: IEEE Transactions on Neural Networks' },
-        book:       { label: 'Nama Penerbit (Publisher)',          placeholder: 'Contoh: Springer, O\'Reilly, Gramedia' },
+        book:       { label: 'Nama Penerbit (Publisher)',           placeholder: 'Contoh: Springer, O\'Reilly, Gramedia' },
         conference: { label: 'Nama Konferensi / Prosiding',        placeholder: 'Contoh: International Conference on Machine Learning (ICML)' },
         website:    { label: 'Nama Situs / Organisasi (Opsional)', placeholder: 'Contoh: Towards Data Science, Medium' },
         thesis:     { label: 'Nama Universitas',                   placeholder: 'Contoh: Binus University, Universitas Indonesia' },
@@ -272,20 +276,10 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Semua alert() validasi → toast error
     function validate(raw) {
-        if (!raw.author) {
-            toast('Kolom Penulis wajib diisi!', 'error');
-            return false;
-        }
-        if (!raw.title) {
-            toast('Kolom Judul wajib diisi!', 'error');
-            return false;
-        }
-        if (!raw.year) {
-            toast('Kolom Tahun wajib diisi!', 'error');
-            return false;
-        }
+        if (!raw.author) { toast('Kolom Penulis wajib diisi!', 'error'); return false; }
+        if (!raw.title)  { toast('Kolom Judul wajib diisi!', 'error');   return false; }
+        if (!raw.year)   { toast('Kolom Tahun wajib diisi!', 'error');   return false; }
         const y = parseInt(raw.year);
         if (isNaN(y) || y < 1900 || y > 2099) {
             toast('Tahun tidak valid!', 'error', 4000, 'Masukkan tahun antara 1900–2099.');
@@ -448,15 +442,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ====================================================
        DOI AUTO-FETCH
-       alert() → toast warning/error/success
     ==================================================== */
-    btnDoiFetch.addEventListener('click', fetchDOI);
-    doiInput.addEventListener('keydown', e => { if (e.key === 'Enter') fetchDOI(); });
+    if (btnDoiFetch) btnDoiFetch.addEventListener('click', fetchDOI);
+    if (doiInput)    doiInput.addEventListener('keydown', e => { if (e.key === 'Enter') fetchDOI(); });
 
     async function fetchDOI() {
         let val = doiInput.value.trim();
         if (!val) {
-            // alert('Tempel DOI terlebih dahulu!') → toast warning
             toast('Kolom DOI kosong!', 'warning', 3000, 'Tempel kode DOI terlebih dahulu lalu coba lagi.');
             doiInput.focus();
             return;
@@ -492,15 +484,14 @@ document.addEventListener('DOMContentLoaded', () => {
             setVal('input-pages',  m.page   || '');
             setVal('input-url',    m.URL    || '');
 
+            const judul = (m.title || [''])[0];
+            toast('Data DOI berhasil dimuat!', 'success', 3500,
+                  judul.length > 55 ? judul.slice(0, 55) + '…' : judul);
+
             btnDoiFetch.innerHTML = '<i class=\'bx bx-check\'></i> Berhasil!';
-
-            // Notifikasi sukses DOI fetch
-            toast('Data DOI berhasil dimuat!', 'success', 3000, `${(m.title || [''])[0].slice(0, 60)}...`);
-
             setTimeout(() => { btnDoiFetch.innerHTML = '<i class=\'bx bx-bolt-circle\'></i> Auto-Fill'; }, 2500);
 
         } catch (err) {
-            // alert('Gagal...') → toast error
             toast('Gagal memuat data DOI', 'error', 5000, 'Pastikan DOI valid dan koneksi internet tersedia.');
             btnDoiFetch.innerHTML = '<i class=\'bx bx-bolt-circle\'></i> Auto-Fill';
         }
@@ -524,9 +515,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         citationHistory.forEach((item, idx) => {
-            const isIEEE   = item.type === 'IEEE';
+            const isIEEE     = item.type === 'IEEE';
             const badgeColor = isIEEE ? '#569CD6' : '#C586C0';
-            const numLabel = isIEEE && item.ieeeNum
+            const numLabel   = isIEEE && item.ieeeNum
                 ? `<span style="color:#4EC9B0;font-size:0.9rem;font-weight:700;">[${item.ieeeNum}]</span>` : '';
             historyList.innerHTML += `
                 <div class="history-item">
@@ -539,7 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="history-text" id="hist-text-${idx}">${item.text}</p>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
-                        <button class="btn icon-btn" onclick="copyHistory(${idx})" title="Salin"><i class='bx bx-copy'></i></button>
+                        <button class="btn icon-btn" onclick="copyHistory(${idx})"   title="Salin"><i class='bx bx-copy'></i></button>
                         <button class="btn icon-btn" onclick="deleteHistory(${idx})" title="Hapus" style="color:#8C3A3A;border-color:#8C3A3A;"><i class='bx bx-trash'></i></button>
                     </div>
                 </div>`;
@@ -555,7 +546,6 @@ document.addEventListener('DOMContentLoaded', () => {
         historyCount.textContent = citationHistory.length > 0 ? `(${citationHistory.length})` : '';
     }
 
-    // alert('Tersalin!') → toast success
     window.copyHistory = idx => {
         const text = document.getElementById(`hist-text-${idx}`)?.innerText;
         if (!text) return;
@@ -563,7 +553,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(() => toast('Sitasi disalin ke clipboard!', 'success', 2500));
     };
 
-    // confirm('Hapus sitasi ini?') → showConfirm()
     window.deleteHistory = async idx => {
         const ok = await showConfirm(
             'Hapus sitasi ini?',
@@ -578,7 +567,6 @@ document.addEventListener('DOMContentLoaded', () => {
         toast('Sitasi dihapus dari riwayat.', 'info', 2500);
     };
 
-    // confirm('Hapus semua riwayat?') → showConfirm()
     btnClearHistory.addEventListener('click', async () => {
         const ok = await showConfirm(
             'Kosongkan semua riwayat?',
@@ -597,11 +585,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ====================================================
        EXPORT
-       alert() kosong → toast warning | sukses → toast success
     ==================================================== */
     btnExportBibtex.addEventListener('click', () => {
         if (!citationHistory.length) {
-            // alert('Kosong!') → toast warning
             toast('Tidak ada sitasi untuk diekspor!', 'warning', 3000, 'Generate minimal satu sitasi terlebih dahulu.');
             return;
         }
@@ -611,22 +597,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const key  = (d.author || 'unknown').split(/[\s,]/)[0].replace(/[^a-zA-Z]/g, '') + (d.year || '0000');
             const type = { journal:'@article', book:'@book', conference:'@inproceedings', website:'@misc', thesis:'@mastersthesis' }[item.sourceType || 'journal'] || '@misc';
             bib += `${type}{${key}_${i + 1},\n  author = {${d.author || ''}},\n  title  = {${d.title  || ''}},\n  year   = {${d.year   || ''}},\n`;
-            if (item.sourceType === 'book') {
-                bib += `  publisher = {${d.source || ''}},\n`;
-                if (d.city) bib += `  address = {${d.city}},\n`;
-            } else if (item.sourceType === 'conference') {
-                bib += `  booktitle = {${d.source || ''}},\n`;
-                if (d.confPages) bib += `  pages = {${d.confPages}},\n`;
-            } else if (item.sourceType === 'website') {
-                bib += `  howpublished = {\\url{${d.webUrl || ''}}},\n`;
-            } else if (item.sourceType === 'thesis') {
-                bib += `  school = {${d.source || ''}},\n  type = {${d.thesisType || 'Skripsi'}},\n`;
-            } else {
-                bib += `  journal = {${d.source || ''}},\n`;
-                if (d.volume) bib += `  volume = {${d.volume}},\n`;
-                if (d.issue)  bib += `  number = {${d.issue}},\n`;
-                if (d.pages)  bib += `  pages  = {${d.pages}},\n`;
-            }
+            if      (item.sourceType === 'book')       { bib += `  publisher = {${d.source || ''}},\n`; if (d.city) bib += `  address = {${d.city}},\n`; }
+            else if (item.sourceType === 'conference') { bib += `  booktitle = {${d.source || ''}},\n`; if (d.confPages) bib += `  pages = {${d.confPages}},\n`; }
+            else if (item.sourceType === 'website')    { bib += `  howpublished = {\\url{${d.webUrl || ''}}},\n`; }
+            else if (item.sourceType === 'thesis')     { bib += `  school = {${d.source || ''}},\n  type = {${d.thesisType || 'Skripsi'}},\n`; }
+            else { bib += `  journal = {${d.source || ''}},\n`; if (d.volume) bib += `  volume = {${d.volume}},\n`; if (d.issue) bib += `  number = {${d.issue}},\n`; if (d.pages) bib += `  pages = {${d.pages}},\n`; }
             if (d.url) bib += `  url = {${d.url}},\n`;
             bib += `}\n\n`;
         });
@@ -636,7 +611,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnExportTxt.addEventListener('click', () => {
         if (!citationHistory.length) {
-            // alert('Kosong!') → toast warning
             toast('Tidak ada sitasi untuk diekspor!', 'warning', 3000, 'Generate minimal satu sitasi terlebih dahulu.');
             return;
         }
@@ -686,4 +660,4 @@ document.addEventListener('DOMContentLoaded', () => {
     updateHistoryCount();
     updateFormFields();
 
-}); // ← Penutup DOMContentLoaded
+}); // ← Satu-satunya penutup DOMContentLoaded
