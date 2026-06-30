@@ -32,8 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ====================================================
        TOAST NOTIFICATION SYSTEM
-       Menggantikan semua alert() di seluruh aplikasi.
-       Penggunaan: toast('Pesan', 'success'|'error'|'warning'|'info', durasi_ms, subtitle)
     ==================================================== */
     function toast(message, type = 'info', duration = 3500, subtitle = '') {
         let container = document.getElementById('toast-container');
@@ -76,8 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ====================================================
        CONFIRM DIALOG
-       Menggantikan semua confirm() di seluruh aplikasi.
-       Penggunaan: const ok = await showConfirm(title, message, confirmLabel, type)
     ==================================================== */
     function showConfirm(title, message, confirmLabel = 'Hapus', type = 'danger') {
         return new Promise(resolve => {
@@ -160,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Terapkan tema tersimpan saat halaman dimuat
     applyTheme(localStorage.getItem('gen_sitasi_theme') === 'dark');
 
     if (btnThemeToggle) {
@@ -169,11 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const newIsDark = !isDark;
             applyTheme(newIsDark);
             localStorage.setItem('gen_sitasi_theme', newIsDark ? 'dark' : 'light');
-            toast(
-                newIsDark ? 'Mode gelap aktif' : 'Mode terang aktif',
-                'info', 2000,
-                newIsDark ? 'Preferensi tersimpan otomatis.' : 'Preferensi tersimpan otomatis.'
-            );
+            toast(newIsDark ? 'Mode gelap aktif' : 'Mode terang aktif', 'info', 2000);
         });
     }
 
@@ -432,7 +423,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnAPA.classList.remove('active-format');
     });
 
-    // Ctrl+Enter → Generate IEEE
     document.addEventListener('keydown', e => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             e.preventDefault();
@@ -508,6 +498,49 @@ document.addEventListener('DOMContentLoaded', () => {
         updateHistoryCount();
     }
 
+    /* ====================================================
+       ✅ FITUR BARU: RENUMBER IEEE OTOMATIS
+
+       Dipanggil setiap kali ada item dihapus dari riwayat.
+
+       Logika:
+       1. Ambil semua item bertipe IEEE, urutkan berdasarkan
+          ieeeNum lama (ascending) — ini menjaga urutan
+          generate aslinya (yang pertama dibuat = [1]).
+       2. Berikan nomor baru berurutan 1, 2, 3, ... tanpa gap.
+       3. Update teks sitasi: ganti prefix "[lama]" → "[baru]"
+          via regex pada awal string.
+       4. Sinkronkan ieeeCounter dengan jumlah IEEE yang
+          tersisa, agar sitasi berikutnya yang di-generate
+          melanjutkan dari nomor yang benar.
+
+       Return: true jika ada perubahan nomor, false jika tidak.
+    ==================================================== */
+    function renumberIEEE() {
+        const ieeeItems = citationHistory
+            .filter(item => item.type === 'IEEE')
+            .sort((a, b) => (a.ieeeNum || 0) - (b.ieeeNum || 0));
+
+        let changed = false;
+
+        ieeeItems.forEach((item, i) => {
+            const newNum = i + 1;
+            if (item.ieeeNum !== newNum) {
+                item.text    = item.text.replace(/^\[\d+\]/, `[${newNum}]`);
+                item.ieeeNum = newNum;
+                changed = true;
+            }
+        });
+
+        const newCounter = ieeeItems.length;
+        if (ieeeCounter !== newCounter) {
+            ieeeCounter = newCounter;
+            localStorage.setItem('ieee_counter', String(ieeeCounter));
+        }
+
+        return changed;
+    }
+
     function renderHistory() {
         historyList.innerHTML = '';
         if (!citationHistory.length) {
@@ -553,18 +586,34 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(() => toast('Sitasi disalin ke clipboard!', 'success', 2500));
     };
 
+    /* ====================================================
+       ✅ DIPERBARUI: deleteHistory sekarang memanggil
+       renumberIEEE() setelah penghapusan, dan menampilkan
+       toast khusus jika ada renumbering yang terjadi.
+    ==================================================== */
     window.deleteHistory = async idx => {
+        const deletedItem = citationHistory[idx];
         const ok = await showConfirm(
             'Hapus sitasi ini?',
             'Sitasi akan dihapus dari riwayat. Tindakan ini tidak dapat dibatalkan.',
             'Hapus'
         );
         if (!ok) return;
+
         citationHistory.splice(idx, 1);
+
+        // Renumber IEEE setelah penghapusan
+        const wasRenumbered = renumberIEEE();
+
         localStorage.setItem('citation_history', JSON.stringify(citationHistory));
         renderHistory();
         updateHistoryCount();
-        toast('Sitasi dihapus dari riwayat.', 'info', 2500);
+
+        if (deletedItem?.type === 'IEEE' && wasRenumbered) {
+            toast('Sitasi dihapus & nomor IEEE diperbarui', 'info', 3000, 'Penomoran [1][2][3] telah disesuaikan ulang.');
+        } else {
+            toast('Sitasi dihapus dari riwayat.', 'info', 2500);
+        }
     };
 
     btnClearHistory.addEventListener('click', async () => {
