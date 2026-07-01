@@ -27,7 +27,6 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/generate-sitation/sitemap.xml">
 
-    <!-- Font Lora — dipakai di KEDUA mode (light & dark) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -48,11 +47,7 @@
 </head>
 <body>
 
-    <!--
-        Tombol toggle diletakkan di luar .app-container
-        agar position: fixed bekerja tanpa gangguan layout.
-        Secara visual akan menempel di pojok kanan atas viewport.
-    -->
+    <!-- Toggle tema — fixed di pojok kanan atas viewport -->
     <button id="btn-theme-toggle"
             class="btn-theme-toggle"
             title="Ganti ke mode gelap"
@@ -74,11 +69,13 @@
                     <h2><i class='bx bx-edit-alt'></i> Detail Sumber Referensi</h2>
                 </div>
 
-                <!-- DOI Auto-Fill -->
-                <div class="form-group" style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px dashed var(--border);">
+                <!-- ① DOI Auto-Fill -->
+                <div class="form-group" style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px dashed var(--border);">
                     <label for="input-doi-quick"><i class='bx bx-link'></i> Auto-Fill via DOI</label>
-                    <div class="doi-group" style="display: flex; gap: 12px;">
-                        <input type="text" id="input-doi-quick" placeholder="Contoh: 10.1109/TITS.2024..." style="flex: 1;">
+                    <div class="search-bar">
+                        <input type="text" id="input-doi-quick"
+                               placeholder="Contoh: 10.1109/TITS.2024..."
+                               style="flex: 1;">
                         <button type="button" id="btn-doi-fetch" class="btn btn-secondary">
                             <i class='bx bx-bolt-circle'></i> Auto-Fill
                         </button>
@@ -86,25 +83,25 @@
                 </div>
 
                 <!-- Pemisah visual -->
-                <div class="search-divider" style="margin-bottom: 20px;">atau cari via keyword</div>
+                <div class="search-divider">atau cari via keyword</div>
 
-                <!-- Keyword Search Section -->
+                <!-- ② Keyword Search -->
                 <div class="form-group" style="margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px dashed var(--border);">
                     <label for="input-keyword-search">
                         <i class='bx bx-search-alt-2'></i> Cari Jurnal / Artikel via Keyword
                     </label>
                     <div class="search-bar">
-                        <input type="text"
-                               id="input-keyword-search"
-                               placeholder="Contoh: pothole detection deep learning, fraud detection machine learning 2023...">
+                        <input type="text" id="input-keyword-search"
+                               placeholder="Contoh: machine learning fraud detection, pothole detection deep learning 2023...">
                         <button type="button" id="btn-keyword-search" class="btn btn-secondary">
                             <i class='bx bx-search'></i> Cari
                         </button>
                     </div>
-                    <!-- Panel hasil muncul di sini secara dinamis -->
+                    <!-- Panel hasil pencarian — muncul secara dinamis via JS -->
                     <div id="search-results" class="search-results hidden"></div>
                 </div>
 
+                <!-- ③ Form Manual -->
                 <form id="citation-form">
 
                     <!-- Tipe Sumber -->
@@ -122,10 +119,13 @@
                     <!-- Penulis -->
                     <div class="form-group">
                         <label for="input-author">Nama Penulis (Pisahkan dengan koma: John Smith, Jane Doe)</label>
-                        <input type="text" id="input-author" placeholder="Contoh: John Smith atau J. Smith, Jane Doe" required>
+                        <input type="text" id="input-author"
+                               placeholder="Contoh: John Smith atau J. Smith, Jane Doe" required>
                         <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
                             <input type="checkbox" id="input-org-author" style="width: auto; margin: 0;">
-                            <label for="input-org-author" style="margin: 0; color: var(--text-muted); cursor: pointer; text-transform: none; letter-spacing: 0; font-size: 0.85rem;">
+                            <label for="input-org-author"
+                                   style="margin: 0; color: var(--text-muted); cursor: pointer;
+                                          text-transform: none; letter-spacing: 0; font-size: 0.85rem;">
                                 Penulis adalah organisasi/lembaga (tidak diformat ulang)
                             </label>
                         </div>
@@ -135,75 +135,121 @@
                     <div class="form-row">
                         <div class="form-group" style="flex: 3;">
                             <label for="input-title">Judul Artikel / Dokumen</label>
-                            <input type="text" id="input-title" placeholder="Masukkan judul dokumen..." required>
+                            <input type="text" id="input-title"
+                                   placeholder="Masukkan judul dokumen..." required>
                         </div>
                         <div class="form-group" style="flex: 1;">
                             <label for="input-year">Tahun Terbit</label>
-                            <input type="number" id="input-year" placeholder="Contoh: 2024" min="1900" max="2099" required>
+                            <input type="number" id="input-year"
+                                   placeholder="Contoh: 2024" min="1900" max="2099" required>
                         </div>
                     </div>
 
-                    <!-- Sumber -->
+                    <!-- Sumber (label berubah sesuai tipe) -->
                     <div class="form-group">
                         <label id="source-label" for="input-source">Nama Jurnal</label>
-                        <input type="text" id="input-source" placeholder="Contoh: IEEE Transactions...">
+                        <input type="text" id="input-source"
+                               placeholder="Contoh: IEEE Transactions...">
                     </div>
 
                     <!-- Field Opsional: Jurnal -->
                     <div class="optional-fields" id="fields-journal">
                         <div class="form-row">
-                            <div class="form-group" style="flex: 1;"><label>Volume</label><input type="text" id="input-volume" placeholder="Opsional"></div>
-                            <div class="form-group" style="flex: 1;"><label>Issue</label><input type="text" id="input-issue" placeholder="Opsional"></div>
-                            <div class="form-group" style="flex: 1;"><label>Halaman</label><input type="text" id="input-pages" placeholder="Opsional"></div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Volume</label>
+                                <input type="text" id="input-volume" placeholder="Opsional">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Issue</label>
+                                <input type="text" id="input-issue" placeholder="Opsional">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Halaman</label>
+                                <input type="text" id="input-pages" placeholder="Opsional">
+                            </div>
                         </div>
-                        <div class="form-group"><label>URL atau DOI</label><input type="text" id="input-url" placeholder="Opsional"></div>
+                        <div class="form-group">
+                            <label>URL atau DOI</label>
+                            <input type="text" id="input-url" placeholder="Opsional">
+                        </div>
                     </div>
 
                     <!-- Field Opsional: Buku -->
                     <div class="optional-fields hidden" id="fields-book">
                         <div class="form-row">
-                            <div class="form-group" style="flex: 2;"><label>Kota Terbit</label><input type="text" id="input-city" placeholder="Opsional"></div>
-                            <div class="form-group" style="flex: 1;"><label>Edisi</label><input type="text" id="input-edition" placeholder="Opsional"></div>
+                            <div class="form-group" style="flex:2;">
+                                <label>Kota Terbit</label>
+                                <input type="text" id="input-city" placeholder="Opsional">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Edisi</label>
+                                <input type="text" id="input-edition" placeholder="Opsional">
+                            </div>
                         </div>
                     </div>
 
                     <!-- Field Opsional: Konferensi -->
                     <div class="optional-fields hidden" id="fields-conference">
                         <div class="form-row">
-                            <div class="form-group" style="flex: 2;"><label>Lokasi Konferensi</label><input type="text" id="input-conf-location" placeholder="Opsional"></div>
-                            <div class="form-group" style="flex: 1;"><label>Halaman</label><input type="text" id="input-conf-pages" placeholder="Opsional"></div>
+                            <div class="form-group" style="flex:2;">
+                                <label>Lokasi Konferensi</label>
+                                <input type="text" id="input-conf-location" placeholder="Opsional">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Halaman</label>
+                                <input type="text" id="input-conf-pages" placeholder="Opsional">
+                            </div>
                         </div>
-                        <div class="form-group"><label>URL atau DOI</label><input type="text" id="input-conf-url" placeholder="Opsional"></div>
+                        <div class="form-group">
+                            <label>URL atau DOI</label>
+                            <input type="text" id="input-conf-url" placeholder="Opsional">
+                        </div>
                     </div>
 
                     <!-- Field Opsional: Website -->
                     <div class="optional-fields hidden" id="fields-website">
                         <div class="form-row">
-                            <div class="form-group" style="flex: 2;"><label>URL (Wajib)</label><input type="text" id="input-web-url" placeholder="https://..."></div>
-                            <div class="form-group" style="flex: 1;"><label>Tanggal Akses</label><input type="date" id="input-access-date"></div>
+                            <div class="form-group" style="flex:2;">
+                                <label>URL (Wajib)</label>
+                                <input type="text" id="input-web-url" placeholder="https://...">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Tanggal Akses</label>
+                                <input type="date" id="input-access-date">
+                            </div>
                         </div>
                     </div>
 
                     <!-- Field Opsional: Skripsi/Tesis -->
                     <div class="optional-fields hidden" id="fields-thesis">
                         <div class="form-row">
-                            <div class="form-group" style="flex: 1;">
+                            <div class="form-group" style="flex:1;">
                                 <label>Tingkat</label>
-                                <select id="input-thesis-type" style="width: 100%;">
+                                <select id="input-thesis-type" style="width:100%;">
                                     <option value="Skripsi">Skripsi (S1)</option>
                                     <option value="Tesis">Tesis (S2)</option>
                                     <option value="Disertasi">Disertasi (S3)</option>
                                 </select>
                             </div>
-                            <div class="form-group" style="flex: 2;"><label>URL Repository</label><input type="text" id="input-thesis-url" placeholder="Opsional"></div>
+                            <div class="form-group" style="flex:2;">
+                                <label>URL Repository</label>
+                                <input type="text" id="input-thesis-url" placeholder="Opsional">
+                            </div>
                         </div>
                     </div>
 
                     <!-- Tombol Aksi -->
-                    <div class="action-buttons" style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
-                        <button type="button" id="btn-ieee"  class="btn btn-primary"><i class='bx bx-check-double'></i> Generate IEEE</button>
-                        <button type="button" id="btn-apa"   class="btn btn-secondary"><i class='bx bx-text'></i> Generate APA</button>
-                        <button type="button" id="btn-reset" class="btn btn-secondary" style="background: transparent;"><i class='bx bx-reset'></i> Reset</button>
+                    <div class="action-buttons" style="display:flex; gap:12px; margin-top:24px; flex-wrap:wrap;">
+                        <button type="button" id="btn-ieee"  class="btn btn-primary">
+                            <i class='bx bx-check-double'></i> Generate IEEE
+                        </button>
+                        <button type="button" id="btn-apa"   class="btn btn-secondary">
+                            <i class='bx bx-text'></i> Generate APA
+                        </button>
+                        <button type="button" id="btn-reset" class="btn btn-secondary"
+                                style="background: transparent;">
+                            <i class='bx bx-reset'></i> Reset
+                        </button>
                     </div>
                 </form>
             </div>
@@ -214,19 +260,30 @@
                     <h2><i class='bx bx-terminal text-success'></i> Output Sitasi (<span id="citation-type-label"></span>)</h2>
                 </div>
                 <div class="result-box">
-                    <p id="output-text" style="font-size: 0.95rem; line-height: 1.6; margin-right: 16px;"></p>
-                    <button id="btn-copy" class="btn icon-btn" title="Salin teks"><i class='bx bx-copy'></i></button>
+                    <p id="output-text" style="font-size:0.95rem; line-height:1.6; margin-right:16px;"></p>
+                    <button id="btn-copy" class="btn icon-btn" title="Salin teks">
+                        <i class='bx bx-copy'></i>
+                    </button>
                 </div>
             </div>
 
             <!-- ===== RIWAYAT ===== -->
             <div class="card" style="margin-top: 24px;">
-                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-                    <h2><i class='bx bx-history text-primary'></i> Riwayat Daftar Pustaka <span id="history-count" style="color: var(--text-muted);"></span></h2>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button id="btn-export-txt"    class="btn btn-secondary" style="padding: 8px 12px; font-size: 0.8rem;"><i class='bx bx-file-blank'></i> .TXT</button>
-                        <button id="btn-export-bibtex" class="btn btn-success"   style="padding: 8px 12px; font-size: 0.8rem;"><i class='bx bxs-file-export'></i> BibTeX</button>
-                        <button id="btn-clear-history" class="btn"               style="padding: 8px 12px; font-size: 0.8rem; background: #C53030; color: white; border: none;"><i class='bx bx-trash'></i> Kosongkan</button>
+                <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                    <h2>
+                        <i class='bx bx-history text-primary'></i> Riwayat Daftar Pustaka
+                        <span id="history-count" style="color:var(--text-muted);"></span>
+                    </h2>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button id="btn-export-txt"    class="btn btn-secondary" style="padding:8px 12px; font-size:0.8rem;">
+                            <i class='bx bx-file-blank'></i> .TXT
+                        </button>
+                        <button id="btn-export-bibtex" class="btn btn-success"   style="padding:8px 12px; font-size:0.8rem;">
+                            <i class='bx bxs-file-export'></i> BibTeX
+                        </button>
+                        <button id="btn-clear-history" class="btn"               style="padding:8px 12px; font-size:0.8rem; background:#C53030; color:white; border:none;">
+                            <i class='bx bx-trash'></i> Kosongkan
+                        </button>
                     </div>
                 </div>
                 <div id="history-list" class="history-container"></div>
