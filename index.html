@@ -85,6 +85,26 @@
                     </div>
                 </div>
 
+                <!-- Pemisah visual -->
+                <div class="search-divider" style="margin-bottom: 20px;">atau cari via keyword</div>
+
+                <!-- Keyword Search Section -->
+                <div class="form-group" style="margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px dashed var(--border);">
+                    <label for="input-keyword-search">
+                        <i class='bx bx-search-alt-2'></i> Cari Jurnal / Artikel via Keyword
+                    </label>
+                    <div class="search-bar">
+                        <input type="text"
+                               id="input-keyword-search"
+                               placeholder="Contoh: pothole detection deep learning, fraud detection machine learning 2023...">
+                        <button type="button" id="btn-keyword-search" class="btn btn-secondary">
+                            <i class='bx bx-search'></i> Cari
+                        </button>
+                    </div>
+                    <!-- Panel hasil muncul di sini secara dinamis -->
+                    <div id="search-results" class="search-results hidden"></div>
+                </div>
+
                 <form id="citation-form">
 
                     <!-- Tipe Sumber -->
