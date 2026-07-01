@@ -77,7 +77,7 @@ Dibangun *Native/Vanilla* tanpa framework eksternal ringan, tidak ada dependensi
 | **CSS3** | Library Card Catalog theme dengan CSS Variables, Flexbox, dark/light mode, dan transisi halus |
 | **Vanilla JavaScript** | `async/await` untuk API fetching, algoritma parsing nama, DOM API, Local Storage API, Blob API |
 | **CrossRef REST API** | Sumber data publik untuk DOI lookup (`/works/{DOI}`) dan keyword search (`/works?query=...`) |
-| **Lora** | Typeface serif hangat via Google Fonts — dipakai di kedua mode (light & dark) |
+| **Lora** | Typeface serif hangat via Google Fonts dipakai di kedua mode (light & dark) |
 | **BoxIcons** | Library ikon via CDN (`unpkg.com/boxicons`) |
 | **Service Worker** | Cache aset untuk penggunaan offline dan peningkatan performa |
 
@@ -94,14 +94,14 @@ Dibangun *Native/Vanilla* tanpa framework eksternal ringan, tidak ada dependensi
    | Cara | Kapan Digunakan |
    |---|---|
    | **DOI Auto-Fill** | Kamu sudah punya kode DOI jurnal (misal: `10.1109/TITS.2024.xxx`) |
-   | **Keyword Search** | Kamu hanya tahu judul atau topik — ketik keyword, pilih dari hasil |
+   | **Keyword Search** | Kamu hanya tahu judul atau topik ketik keyword, pilih dari hasil |
    | **Manual** | Sumber tidak memiliki DOI (buku tua, skripsi, website) |
 
 3. Pilih **Tipe Sumber** (Jurnal / Buku / Konferensi / Website / Skripsi), lalu lengkapi field yang muncul.
 
 4. Klik **Generate IEEE** atau **Generate APA** (atau tekan `Ctrl + Enter` untuk IEEE).
 
-5. Hasil sitasi muncul di kotak bawah — klik ikon salin untuk menyalinnya ke clipboard.
+5. Hasil sitasi muncul di kotak bawah klik ikon salin untuk menyalinnya ke clipboard.
 
 6. Ulangi untuk semua referensi yang dibutuhkan; semua tersimpan otomatis di bagian **Riwayat**.
 
