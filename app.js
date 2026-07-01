@@ -23,12 +23,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnThemeToggle   = document.getElementById('btn-theme-toggle');
     const themeIcon        = document.getElementById('theme-icon');
 
+    // ✅ Elemen baru: keyword search
+    const keywordInput     = document.getElementById('input-keyword-search');
+    const btnKeywordSearch = document.getElementById('btn-keyword-search');
+    const searchResultsEl  = document.getElementById('search-results');
+
     /* ====================================================
        STATE
     ==================================================== */
     let currentSourceType = 'journal';
     let citationHistory   = JSON.parse(localStorage.getItem('citation_history')) || [];
     let ieeeCounter       = parseInt(localStorage.getItem('ieee_counter') || '0');
+    let searchResultsData = [];   // simpan data hasil search untuk diakses saat user memilih
 
     /* ====================================================
        TOAST NOTIFICATION SYSTEM
@@ -411,7 +417,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnReset.addEventListener('click', () => {
         document.getElementById('citation-form').reset();
-        if (doiInput) doiInput.value = '';
+        if (doiInput)    doiInput.value = '';
+        if (keywordInput) { keywordInput.value = ''; closeSearchResults(); }
         sourceBtns.forEach(b => {
             b.classList.remove('active');
             if (b.dataset.type === 'journal') b.classList.add('active');
@@ -424,10 +431,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('keydown', e => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            e.preventDefault();
-            btnIEEE.click();
-        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); btnIEEE.click(); }
+        if (e.key === 'Escape') closeSearchResults();
     });
 
     /* ====================================================
@@ -459,20 +464,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const typeMap  = { 'journal-article':'journal','book':'book','proceedings-article':'conference','dissertation':'thesis' };
             const detected = typeMap[m.type] || 'journal';
 
-            document.getElementById('input-author').value = authors;
-            document.getElementById('input-title').value  = (m.title || [''])[0];
-            document.getElementById('input-year').value   = year;
-            document.getElementById('input-source').value = journal;
-
-            sourceBtns.forEach(b => { b.classList.remove('active'); if (b.dataset.type === detected) b.classList.add('active'); });
-            currentSourceType = detected;
-            updateFormFields();
-
-            const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
-            setVal('input-volume', m.volume || '');
-            setVal('input-issue',  m.issue  || '');
-            setVal('input-pages',  m.page   || '');
-            setVal('input-url',    m.URL    || '');
+            fillFormFromCrossRef({ author: authors, title: (m.title || [''])[0], year, source: journal,
+                                   volume: m.volume || '', issue: m.issue || '', pages: m.page || '',
+                                   url: m.URL || '', detected });
 
             const judul = (m.title || [''])[0];
             toast('Data DOI berhasil dimuat!', 'success', 3500,
@@ -489,6 +483,208 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ====================================================
+       ✅ FITUR BARU: KEYWORD SEARCH via CrossRef API
+
+       CrossRef Search API:
+       GET https://api.crossref.org/works?query={keyword}&rows=8
+           &select=DOI,title,author,published,container-title,volume,issue,page,type
+
+       Menampilkan panel hasil dengan info:
+       - Judul artikel (max 2 baris)
+       - Penulis pertama + tahun + nama jurnal
+       - Badge tipe sumber
+       - Tombol "Pilih" yang mengisi form otomatis
+    ==================================================== */
+
+    // Pasang event listener jika elemen ada di DOM
+    if (btnKeywordSearch) btnKeywordSearch.addEventListener('click', searchByKeyword);
+    if (keywordInput) {
+        keywordInput.addEventListener('keydown', e => { if (e.key === 'Enter') searchByKeyword(); });
+    }
+
+    // Tutup panel saat klik di luar area search
+    document.addEventListener('click', e => {
+        if (!searchResultsEl) return;
+        const container = searchResultsEl.closest('.form-group') || searchResultsEl;
+        if (!container.contains(e.target) && !keywordInput?.contains(e.target) && !btnKeywordSearch?.contains(e.target)) {
+            closeSearchResults();
+        }
+    });
+
+    function closeSearchResults() {
+        if (searchResultsEl) searchResultsEl.classList.add('hidden');
+    }
+
+    async function searchByKeyword() {
+        if (!keywordInput || !searchResultsEl) return;
+
+        const keyword = keywordInput.value.trim();
+        if (!keyword) {
+            toast('Kolom pencarian kosong!', 'warning', 3000, 'Ketik judul atau keyword jurnal yang dicari.');
+            keywordInput.focus();
+            return;
+        }
+
+        // Tampilkan loading state
+        searchResultsEl.classList.remove('hidden');
+        searchResultsEl.innerHTML = `
+            <div class="search-loading">
+                <i class="bx bx-loader-alt bx-spin" style="font-size:1.1rem;color:var(--primary);" aria-hidden="true"></i>
+                Mencari di CrossRef...
+            </div>`;
+
+        btnKeywordSearch.innerHTML  = '<i class=\'bx bx-loader-alt bx-spin\'></i> Mencari...';
+        btnKeywordSearch.disabled   = true;
+
+        try {
+            // CrossRef public search API — gratis, tidak perlu API key
+            // Tambah &mailto untuk masuk ke polite pool (lebih cepat & stabil)
+            const fields = 'DOI,title,author,published,published-print,published-online,container-title,volume,issue,page,type';
+            const url    = `https://api.crossref.org/works?query=${encodeURIComponent(keyword)}&rows=8&select=${fields}&mailto=user@generate-sitation.app`;
+            const res    = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const { message } = await res.json();
+            const items = (message.items || []).filter(item => (item.title || []).length > 0);
+
+            if (items.length === 0) {
+                searchResultsEl.innerHTML = `<div class="search-empty">Tidak ada hasil untuk "<strong>${keyword}</strong>". Coba kata kunci lain.</div>`;
+                toast('Tidak ada hasil ditemukan.', 'warning', 3000, 'Coba variasikan keyword — gunakan bahasa Inggris atau kata kunci lebih spesifik.');
+            } else {
+                searchResultsData = items;
+                renderSearchResults(items, keyword);
+                toast(`${items.length} hasil ditemukan`, 'success', 2000, `Untuk keyword: "${keyword.slice(0, 40)}"`);
+            }
+
+        } catch (err) {
+            searchResultsEl.innerHTML = `<div class="search-empty">Gagal menghubungi CrossRef. Periksa koneksi internet dan coba lagi.</div>`;
+            toast('Gagal terhubung ke CrossRef', 'error', 5000, 'Pastikan koneksi internet tersedia.');
+        }
+
+        btnKeywordSearch.innerHTML = '<i class=\'bx bx-search\'></i> Cari';
+        btnKeywordSearch.disabled  = false;
+    }
+
+    /* ====================================================
+       RENDER HASIL PENCARIAN
+    ==================================================== */
+    function renderSearchResults(items, keyword) {
+        const typeLabel = { 'journal-article':'Jurnal', 'book':'Buku', 'proceedings-article':'Konferensi',
+                            'dissertation':'Tesis', 'book-chapter':'Bab Buku' };
+
+        let html = `<div class="search-results-header">${items.length} hasil untuk "${keyword.slice(0, 35)}"</div>`;
+        html += `<div class="search-results-list">`;
+
+        items.forEach((item, idx) => {
+            const title    = (item.title || ['Tanpa judul'])[0];
+            const journal  = (item['container-title'] || [''])[0];
+            const year     = (item.published || item['published-print'] || item['published-online'] || {})['date-parts']?.[0]?.[0] || '—';
+            const authors  = (item.author || []);
+            const type     = typeLabel[item.type] || item.type || '—';
+
+            // Format nama penulis: "Doe et al." jika >2, "Doe & Smith" jika 2, "Doe" jika 1
+            let authorStr = '—';
+            if (authors.length === 1) {
+                authorStr = authors[0].family || authors[0].given || '—';
+            } else if (authors.length === 2) {
+                const a1 = authors[0].family || authors[0].given || '';
+                const a2 = authors[1].family || authors[1].given || '';
+                authorStr = `${a1} & ${a2}`;
+            } else if (authors.length > 2) {
+                authorStr = `${authors[0].family || authors[0].given || '—'} et al.`;
+            }
+
+            html += `
+                <div class="search-result-item" onclick="selectSearchResult(${idx})" role="button" tabindex="0"
+                     onkeydown="if(event.key==='Enter'||event.key===' ')selectSearchResult(${idx})">
+                    <div class="sri-num" aria-hidden="true">${idx + 1}</div>
+                    <div class="sri-body">
+                        <div class="sri-title">${escapeHtml(title)}</div>
+                        <div class="sri-meta">
+                            <span>${escapeHtml(authorStr)}</span>
+                            <span class="sri-sep">·</span>
+                            <span>${year}</span>
+                            ${journal ? `<span class="sri-sep">·</span><span class="sri-journal">${escapeHtml(journal)}</span>` : ''}
+                            <span class="sri-sep">·</span>
+                            <span class="sri-type">${escapeHtml(type)}</span>
+                        </div>
+                    </div>
+                    <button class="sri-pick" tabindex="-1" aria-hidden="true">Pilih →</button>
+                </div>`;
+        });
+
+        html += `</div>`;
+        searchResultsEl.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    /* ====================================================
+       PILIH HASIL PENCARIAN → ISI FORM
+    ==================================================== */
+    window.selectSearchResult = function(idx) {
+        const item = searchResultsData[idx];
+        if (!item) return;
+
+        const authors  = (item.author || []).map(a => [a.given, a.family].filter(Boolean).join(' ')).join(', ');
+        const title    = (item.title || [''])[0];
+        const year     = (item.published || item['published-print'] || item['published-online'] || {})['date-parts']?.[0]?.[0] || '';
+        const source   = (item['container-title'] || [''])[0];
+        const typeMap  = { 'journal-article':'journal','book':'book','proceedings-article':'conference','dissertation':'thesis' };
+        const detected = typeMap[item.type] || 'journal';
+
+        fillFormFromCrossRef({
+            author:   authors,
+            title,
+            year:     String(year),
+            source,
+            volume:   item.volume || '',
+            issue:    item.issue  || '',
+            pages:    item.page   || '',
+            url:      item.DOI ? `https://doi.org/${item.DOI}` : '',
+            detected,
+        });
+
+        closeSearchResults();
+        keywordInput.value = '';
+
+        // Scroll ke form agar user langsung lihat hasil pengisian
+        document.getElementById('citation-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        const shortTitle = title.length > 50 ? title.slice(0, 50) + '…' : title;
+        toast('Form berhasil diisi!', 'success', 3500, shortTitle);
+    };
+
+    /* ====================================================
+       HELPER: ISI FORM DARI DATA CROSSREF
+       Dipakai bersama oleh DOI fetch DAN keyword search
+    ==================================================== */
+    function fillFormFromCrossRef({ author, title, year, source, volume, issue, pages, url, detected }) {
+        document.getElementById('input-author').value = author;
+        document.getElementById('input-title').value  = title;
+        document.getElementById('input-year').value   = year;
+        document.getElementById('input-source').value = source;
+
+        // Switch tipe sumber
+        sourceBtns.forEach(b => { b.classList.remove('active'); if (b.dataset.type === detected) b.classList.add('active'); });
+        currentSourceType = detected;
+        updateFormFields();
+
+        // Isi field opsional setelah form di-update
+        const setVal = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+        setVal('input-volume', volume);
+        setVal('input-issue',  issue);
+        setVal('input-pages',  pages);
+        setVal('input-url',    url);
+    }
+
+    /* ====================================================
        HISTORY MANAGEMENT
     ==================================================== */
     function saveHistory(text, type, rawData, sourceType, ieeeNum) {
@@ -499,22 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ====================================================
-       ✅ FITUR BARU: RENUMBER IEEE OTOMATIS
-
-       Dipanggil setiap kali ada item dihapus dari riwayat.
-
-       Logika:
-       1. Ambil semua item bertipe IEEE, urutkan berdasarkan
-          ieeeNum lama (ascending) — ini menjaga urutan
-          generate aslinya (yang pertama dibuat = [1]).
-       2. Berikan nomor baru berurutan 1, 2, 3, ... tanpa gap.
-       3. Update teks sitasi: ganti prefix "[lama]" → "[baru]"
-          via regex pada awal string.
-       4. Sinkronkan ieeeCounter dengan jumlah IEEE yang
-          tersisa, agar sitasi berikutnya yang di-generate
-          melanjutkan dari nomor yang benar.
-
-       Return: true jika ada perubahan nomor, false jika tidak.
+       RENUMBER IEEE OTOMATIS
     ==================================================== */
     function renumberIEEE() {
         const ieeeItems = citationHistory
@@ -522,7 +703,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .sort((a, b) => (a.ieeeNum || 0) - (b.ieeeNum || 0));
 
         let changed = false;
-
         ieeeItems.forEach((item, i) => {
             const newNum = i + 1;
             if (item.ieeeNum !== newNum) {
@@ -582,15 +762,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.copyHistory = idx => {
         const text = document.getElementById(`hist-text-${idx}`)?.innerText;
         if (!text) return;
-        navigator.clipboard.writeText(text)
-            .then(() => toast('Sitasi disalin ke clipboard!', 'success', 2500));
+        navigator.clipboard.writeText(text).then(() => toast('Sitasi disalin ke clipboard!', 'success', 2500));
     };
 
-    /* ====================================================
-       ✅ DIPERBARUI: deleteHistory sekarang memanggil
-       renumberIEEE() setelah penghapusan, dan menampilkan
-       toast khusus jika ada renumbering yang terjadi.
-    ==================================================== */
     window.deleteHistory = async idx => {
         const deletedItem = citationHistory[idx];
         const ok = await showConfirm(
@@ -601,10 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!ok) return;
 
         citationHistory.splice(idx, 1);
-
-        // Renumber IEEE setelah penghapusan
         const wasRenumbered = renumberIEEE();
-
         localStorage.setItem('citation_history', JSON.stringify(citationHistory));
         renderHistory();
         updateHistoryCount();
