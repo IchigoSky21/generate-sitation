@@ -10,7 +10,7 @@ Aplikasi web statis berbasis *Client-Side* untuk menyusun dan mengelola daftar p
 
 Sangat ideal untuk penyusunan sitasi pada karya tulis ilmiah di bidang *Software Engineering*, *Machine Learning*, maupun *Computer Vision* yang menuntut format referensi ketat (IEEE / APA).
 
-🌐 https://ichigosky21.github.io/generate-sitation/ 
+🌐 **[Coba Aplikasi Langsung (Live Demo)](https://ichigosky21.github.io/generate-sitation/)**
 
 ---
 
