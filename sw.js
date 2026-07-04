@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sitasi-cache-v9';  // ← naik ke v8 karena URL berubah
+const CACHE_NAME = 'sitasi-cache-v10';  // ← naik ke v8 karena URL berubah
 const urlsToCache = [
     './',
     './index.html',
