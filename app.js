@@ -1,40 +1,61 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    const btnIEEE         = document.getElementById('btn-ieee');
+    const btnAPA          = document.getElementById('btn-apa');
+    const btnReset        = document.getElementById('btn-reset');
+    const resultCard      = document.getElementById('result-card');
+    const outputText      = document.getElementById('output-text');
+    const citTypeLabel    = document.getElementById('citation-type-label');
+    const btnCopy         = document.getElementById('btn-copy');
+    const historyList     = document.getElementById('history-list');
+    const historyCount    = document.getElementById('history-count');
+    const btnExportBibtex = document.getElementById('btn-export-bibtex');
+    const btnExportTxt    = document.getElementById('btn-export-txt');
+    const btnClearHistory = document.getElementById('btn-clear-history');
+    const sourceBtns      = document.querySelectorAll('.source-btn');
+    const sourceLabelEl   = document.getElementById('source-label');
+    const sourceInput     = document.getElementById('input-source');
+    const doiInput        = document.getElementById('input-doi-quick');
+    const btnDoiFetch     = document.getElementById('btn-doi-fetch');
+
     /* ====================================================
-       DOM ELEMENTS
+       DARK/LIGHT THEME TOGGLE
     ==================================================== */
-    const btnIEEE          = document.getElementById('btn-ieee');
-    const btnAPA           = document.getElementById('btn-apa');
-    const btnReset         = document.getElementById('btn-reset');
-    const resultCard       = document.getElementById('result-card');
-    const outputText       = document.getElementById('output-text');
-    const citTypeLabel     = document.getElementById('citation-type-label');
-    const btnCopy          = document.getElementById('btn-copy');
-    const historyList      = document.getElementById('history-list');
-    const historyCount     = document.getElementById('history-count');
-    const btnExportBibtex  = document.getElementById('btn-export-bibtex');
-    const btnExportTxt     = document.getElementById('btn-export-txt');
-    const btnClearHistory  = document.getElementById('btn-clear-history');
-    const sourceBtns       = document.querySelectorAll('.source-btn');
-    const sourceLabelEl    = document.getElementById('source-label');
-    const sourceInput      = document.getElementById('input-source');
-    const doiInput         = document.getElementById('input-doi-quick');
-    const btnDoiFetch      = document.getElementById('btn-doi-fetch');
-    const btnThemeToggle   = document.getElementById('btn-theme-toggle');
-    const themeIcon        = document.getElementById('theme-icon');
+    const themeToggleBtn = document.getElementById('btn-theme-toggle');
+    const themeIcon      = themeToggleBtn ? themeToggleBtn.querySelector('i') : null;
+    const metaThemeColor = document.getElementById('meta-theme-color');
 
-    // ✅ Elemen baru: keyword search
-    const keywordInput     = document.getElementById('input-keyword-search');
-    const btnKeywordSearch = document.getElementById('btn-keyword-search');
-    const searchResultsEl  = document.getElementById('search-results');
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('app_theme', theme);
+        
+        if (themeIcon) {
+            if (theme === 'dark') {
+                themeIcon.className = 'bx bx-sun';
+                if(metaThemeColor) metaThemeColor.setAttribute('content', '#1E1E1E');
+            } else {
+                themeIcon.className = 'bx bx-moon';
+                if(metaThemeColor) metaThemeColor.setAttribute('content', '#6B3A1F');
+            }
+        }
+    }
+
+    const savedTheme = localStorage.getItem('app_theme') || 'light';
+    setTheme(savedTheme);
+
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            setTheme(currentTheme === 'light' ? 'dark' : 'light');
+        });
+    }
 
     /* ====================================================
-       STATE
+       STATE VARIABLES
     ==================================================== */
     let currentSourceType = 'journal';
     let citationHistory   = JSON.parse(localStorage.getItem('citation_history')) || [];
     let ieeeCounter       = parseInt(localStorage.getItem('ieee_counter') || '0');
-    let searchResultsData = [];   // simpan data hasil search untuk diakses saat user memilih
 
     /* ====================================================
        TOAST NOTIFICATION SYSTEM
@@ -76,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const timer = setTimeout(dismiss, duration);
         el.querySelector('.toast-close').addEventListener('click', dismiss);
+        return el;
     }
 
     /* ====================================================
@@ -92,11 +114,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 overlay.innerHTML = `
                     <div class="confirm-box">
                         <div class="confirm-header">
-                            <div class="confirm-icon-wrap confirm-icon-danger" id="conf-icon-wrap">
+                            <div class="confirm-icon-wrap confirm-icon-${type}" id="conf-icon-wrap">
                                 <i class="bx bx-trash" id="conf-icon" aria-hidden="true"></i>
                             </div>
                             <div>
-                                <div class="confirm-title"   id="conf-title"></div>
+                                <div class="confirm-title" id="conf-title"></div>
                                 <div class="confirm-message" id="conf-msg"></div>
                             </div>
                         </div>
@@ -105,14 +127,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="btn btn-secondary" id="conf-cancel">Batal</button>
                             <button class="btn btn-danger"    id="conf-ok"></button>
                         </div>
-                    </div>`;
+                    </div>
+                `;
                 document.body.appendChild(overlay);
             }
 
             const iconWrap = document.getElementById('conf-icon-wrap');
             const icon     = document.getElementById('conf-icon');
             iconWrap.className = `confirm-icon-wrap confirm-icon-${type}`;
-            icon.className     = type === 'danger' ? 'bx bx-trash' : 'bx bx-error';
+            icon.className = type === 'danger' ? 'bx bx-trash' : 'bx bx-error';
+
             document.getElementById('conf-title').textContent = title;
             document.getElementById('conf-msg').textContent   = message;
             document.getElementById('conf-ok').textContent    = confirmLabel;
@@ -142,44 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ====================================================
-       DARK / LIGHT MODE TOGGLE
-    ==================================================== */
-    function applyTheme(isDark) {
-        if (isDark) {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            if (themeIcon)      themeIcon.className = 'bx bx-sun';
-            if (btnThemeToggle) {
-                btnThemeToggle.setAttribute('aria-label', 'Ganti ke mode terang');
-                btnThemeToggle.setAttribute('title',      'Ganti ke mode terang');
-            }
-        } else {
-            document.documentElement.removeAttribute('data-theme');
-            if (themeIcon)      themeIcon.className = 'bx bx-moon';
-            if (btnThemeToggle) {
-                btnThemeToggle.setAttribute('aria-label', 'Ganti ke mode gelap');
-                btnThemeToggle.setAttribute('title',      'Ganti ke mode gelap');
-            }
-        }
-    }
-
-    applyTheme(localStorage.getItem('gen_sitasi_theme') === 'dark');
-
-    if (btnThemeToggle) {
-        btnThemeToggle.addEventListener('click', () => {
-            const isDark    = document.documentElement.getAttribute('data-theme') === 'dark';
-            const newIsDark = !isDark;
-            applyTheme(newIsDark);
-            localStorage.setItem('gen_sitasi_theme', newIsDark ? 'dark' : 'light');
-            toast(newIsDark ? 'Mode gelap aktif' : 'Mode terang aktif', 'info', 2000);
-        });
-    }
-
-    /* ====================================================
        SOURCE TYPE CONFIGURATION
     ==================================================== */
     const sourceConfig = {
         journal:    { label: 'Nama Jurnal',                        placeholder: 'Contoh: IEEE Transactions on Neural Networks' },
-        book:       { label: 'Nama Penerbit (Publisher)',           placeholder: 'Contoh: Springer, O\'Reilly, Gramedia' },
+        book:       { label: 'Nama Penerbit (Publisher)',          placeholder: 'Contoh: Springer, O\'Reilly, Gramedia' },
         conference: { label: 'Nama Konferensi / Prosiding',        placeholder: 'Contoh: International Conference on Machine Learning (ICML)' },
         website:    { label: 'Nama Situs / Organisasi (Opsional)', placeholder: 'Contoh: Towards Data Science, Medium' },
         thesis:     { label: 'Nama Universitas',                   placeholder: 'Contoh: Binus University, Universitas Indonesia' },
@@ -275,21 +266,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function validate(raw) {
         if (!raw.author) { toast('Kolom Penulis wajib diisi!', 'error'); return false; }
-        if (!raw.title)  { toast('Kolom Judul wajib diisi!', 'error');   return false; }
-        if (!raw.year)   { toast('Kolom Tahun wajib diisi!', 'error');   return false; }
+        if (!raw.title) { toast('Kolom Judul wajib diisi!', 'error'); return false; }
+        if (!raw.year) { toast('Kolom Tahun wajib diisi!', 'error'); return false; }
         const y = parseInt(raw.year);
-        if (isNaN(y) || y < 1900 || y > 2099) {
-            toast('Tahun tidak valid!', 'error', 4000, 'Masukkan tahun antara 1900–2099.');
-            return false;
-        }
-        if (!raw.source && currentSourceType !== 'website') {
-            toast(`Kolom "${sourceConfig[currentSourceType].label}" wajib diisi!`, 'error');
-            return false;
-        }
-        if (currentSourceType === 'website' && !raw.webUrl) {
-            toast('URL wajib diisi untuk sumber jenis Website!', 'error');
-            return false;
-        }
+        if (isNaN(y) || y < 1900 || y > 2099) { toast('Tahun tidak valid!', 'error', 4000, 'Masukkan tahun antara 1900–2099.'); return false; }
+        if (!raw.source && currentSourceType !== 'website') { toast(`Kolom "${sourceConfig[currentSourceType].label}" wajib diisi!`, 'error'); return false; }
+        if (currentSourceType === 'website' && !raw.webUrl) { toast('URL wajib diisi untuk sumber jenis Website!', 'error'); return false; }
         return true;
     }
 
@@ -417,8 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnReset.addEventListener('click', () => {
         document.getElementById('citation-form').reset();
-        if (doiInput)    doiInput.value = '';
-        if (keywordInput) { keywordInput.value = ''; closeSearchResults(); }
+        if (doiInput) doiInput.value = '';
         sourceBtns.forEach(b => {
             b.classList.remove('active');
             if (b.dataset.type === 'journal') b.classList.add('active');
@@ -431,15 +412,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('keydown', e => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); btnIEEE.click(); }
-        if (e.key === 'Escape') closeSearchResults();
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            btnIEEE.click();
+        }
     });
 
     /* ====================================================
        DOI AUTO-FETCH
     ==================================================== */
-    if (btnDoiFetch) btnDoiFetch.addEventListener('click', fetchDOI);
-    if (doiInput)    doiInput.addEventListener('keydown', e => { if (e.key === 'Enter') fetchDOI(); });
+    btnDoiFetch.addEventListener('click', fetchDOI);
+    doiInput.addEventListener('keydown', e => { if (e.key === 'Enter') fetchDOI(); });
 
     async function fetchDOI() {
         let val = doiInput.value.trim();
@@ -464,15 +447,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const typeMap  = { 'journal-article':'journal','book':'book','proceedings-article':'conference','dissertation':'thesis' };
             const detected = typeMap[m.type] || 'journal';
 
-            fillFormFromCrossRef({ author: authors, title: (m.title || [''])[0], year, source: journal,
-                                   volume: m.volume || '', issue: m.issue || '', pages: m.page || '',
-                                   url: m.URL || '', detected });
+            document.getElementById('input-author').value = authors;
+            document.getElementById('input-title').value  = (m.title || [''])[0];
+            document.getElementById('input-year').value   = year;
+            document.getElementById('input-source').value = journal;
 
-            const judul = (m.title || [''])[0];
-            toast('Data DOI berhasil dimuat!', 'success', 3500,
-                  judul.length > 55 ? judul.slice(0, 55) + '…' : judul);
+            sourceBtns.forEach(b => { b.classList.remove('active'); if (b.dataset.type === detected) b.classList.add('active'); });
+            currentSourceType = detected;
+            updateFormFields();
+
+            const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+            setVal('input-volume', m.volume || '');
+            setVal('input-issue',  m.issue  || '');
+            setVal('input-pages',  m.page   || '');
+            setVal('input-url',    m.URL    || '');
 
             btnDoiFetch.innerHTML = '<i class=\'bx bx-check\'></i> Berhasil!';
+            toast('Data DOI berhasil dimuat!', 'success', 3000, `${(m.title || [''])[0].slice(0, 60)}...`);
             setTimeout(() => { btnDoiFetch.innerHTML = '<i class=\'bx bx-bolt-circle\'></i> Auto-Fill'; }, 2500);
 
         } catch (err) {
@@ -480,208 +471,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btnDoiFetch.innerHTML = '<i class=\'bx bx-bolt-circle\'></i> Auto-Fill';
         }
         btnDoiFetch.disabled = false;
-    }
-
-    /* ====================================================
-       ✅ FITUR BARU: KEYWORD SEARCH via CrossRef API
-
-       CrossRef Search API:
-       GET https://api.crossref.org/works?query={keyword}&rows=8
-           &select=DOI,title,author,published,container-title,volume,issue,page,type
-
-       Menampilkan panel hasil dengan info:
-       - Judul artikel (max 2 baris)
-       - Penulis pertama + tahun + nama jurnal
-       - Badge tipe sumber
-       - Tombol "Pilih" yang mengisi form otomatis
-    ==================================================== */
-
-    // Pasang event listener jika elemen ada di DOM
-    if (btnKeywordSearch) btnKeywordSearch.addEventListener('click', searchByKeyword);
-    if (keywordInput) {
-        keywordInput.addEventListener('keydown', e => { if (e.key === 'Enter') searchByKeyword(); });
-    }
-
-    // Tutup panel saat klik di luar area search
-    document.addEventListener('click', e => {
-        if (!searchResultsEl) return;
-        const container = searchResultsEl.closest('.form-group') || searchResultsEl;
-        if (!container.contains(e.target) && !keywordInput?.contains(e.target) && !btnKeywordSearch?.contains(e.target)) {
-            closeSearchResults();
-        }
-    });
-
-    function closeSearchResults() {
-        if (searchResultsEl) searchResultsEl.classList.add('hidden');
-    }
-
-    async function searchByKeyword() {
-        if (!keywordInput || !searchResultsEl) return;
-
-        const keyword = keywordInput.value.trim();
-        if (!keyword) {
-            toast('Kolom pencarian kosong!', 'warning', 3000, 'Ketik judul atau keyword jurnal yang dicari.');
-            keywordInput.focus();
-            return;
-        }
-
-        // Tampilkan loading state
-        searchResultsEl.classList.remove('hidden');
-        searchResultsEl.innerHTML = `
-            <div class="search-loading">
-                <i class="bx bx-loader-alt bx-spin" style="font-size:1.1rem;color:var(--primary);" aria-hidden="true"></i>
-                Mencari di CrossRef...
-            </div>`;
-
-        btnKeywordSearch.innerHTML  = '<i class=\'bx bx-loader-alt bx-spin\'></i> Mencari...';
-        btnKeywordSearch.disabled   = true;
-
-        try {
-            // CrossRef public search API — gratis, tidak perlu API key
-            // Tambah &mailto untuk masuk ke polite pool (lebih cepat & stabil)
-            const fields = 'DOI,title,author,published,published-print,published-online,container-title,volume,issue,page,type';
-            const url    = `https://api.crossref.org/works?query=${encodeURIComponent(keyword)}&rows=8&select=${fields}&mailto=user@generate-sitation.app`;
-            const res    = await fetch(url);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const { message } = await res.json();
-            const items = (message.items || []).filter(item => (item.title || []).length > 0);
-
-            if (items.length === 0) {
-                searchResultsEl.innerHTML = `<div class="search-empty">Tidak ada hasil untuk "<strong>${keyword}</strong>". Coba kata kunci lain.</div>`;
-                toast('Tidak ada hasil ditemukan.', 'warning', 3000, 'Coba variasikan keyword — gunakan bahasa Inggris atau kata kunci lebih spesifik.');
-            } else {
-                searchResultsData = items;
-                renderSearchResults(items, keyword);
-                toast(`${items.length} hasil ditemukan`, 'success', 2000, `Untuk keyword: "${keyword.slice(0, 40)}"`);
-            }
-
-        } catch (err) {
-            searchResultsEl.innerHTML = `<div class="search-empty">Gagal menghubungi CrossRef. Periksa koneksi internet dan coba lagi.</div>`;
-            toast('Gagal terhubung ke CrossRef', 'error', 5000, 'Pastikan koneksi internet tersedia.');
-        }
-
-        btnKeywordSearch.innerHTML = '<i class=\'bx bx-search\'></i> Cari';
-        btnKeywordSearch.disabled  = false;
-    }
-
-    /* ====================================================
-       RENDER HASIL PENCARIAN
-    ==================================================== */
-    function renderSearchResults(items, keyword) {
-        const typeLabel = { 'journal-article':'Jurnal', 'book':'Buku', 'proceedings-article':'Konferensi',
-                            'dissertation':'Tesis', 'book-chapter':'Bab Buku' };
-
-        let html = `<div class="search-results-header">${items.length} hasil untuk "${keyword.slice(0, 35)}"</div>`;
-        html += `<div class="search-results-list">`;
-
-        items.forEach((item, idx) => {
-            const title    = (item.title || ['Tanpa judul'])[0];
-            const journal  = (item['container-title'] || [''])[0];
-            const year     = (item.published || item['published-print'] || item['published-online'] || {})['date-parts']?.[0]?.[0] || '—';
-            const authors  = (item.author || []);
-            const type     = typeLabel[item.type] || item.type || '—';
-
-            // Format nama penulis: "Doe et al." jika >2, "Doe & Smith" jika 2, "Doe" jika 1
-            let authorStr = '—';
-            if (authors.length === 1) {
-                authorStr = authors[0].family || authors[0].given || '—';
-            } else if (authors.length === 2) {
-                const a1 = authors[0].family || authors[0].given || '';
-                const a2 = authors[1].family || authors[1].given || '';
-                authorStr = `${a1} & ${a2}`;
-            } else if (authors.length > 2) {
-                authorStr = `${authors[0].family || authors[0].given || '—'} et al.`;
-            }
-
-            html += `
-                <div class="search-result-item" onclick="selectSearchResult(${idx})" role="button" tabindex="0"
-                     onkeydown="if(event.key==='Enter'||event.key===' ')selectSearchResult(${idx})">
-                    <div class="sri-num" aria-hidden="true">${idx + 1}</div>
-                    <div class="sri-body">
-                        <div class="sri-title">${escapeHtml(title)}</div>
-                        <div class="sri-meta">
-                            <span>${escapeHtml(authorStr)}</span>
-                            <span class="sri-sep">·</span>
-                            <span>${year}</span>
-                            ${journal ? `<span class="sri-sep">·</span><span class="sri-journal">${escapeHtml(journal)}</span>` : ''}
-                            <span class="sri-sep">·</span>
-                            <span class="sri-type">${escapeHtml(type)}</span>
-                        </div>
-                    </div>
-                    <button class="sri-pick" tabindex="-1" aria-hidden="true">Pilih →</button>
-                </div>`;
-        });
-
-        html += `</div>`;
-        searchResultsEl.innerHTML = html;
-    }
-
-    function escapeHtml(str) {
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
-    }
-
-    /* ====================================================
-       PILIH HASIL PENCARIAN → ISI FORM
-    ==================================================== */
-    window.selectSearchResult = function(idx) {
-        const item = searchResultsData[idx];
-        if (!item) return;
-
-        const authors  = (item.author || []).map(a => [a.given, a.family].filter(Boolean).join(' ')).join(', ');
-        const title    = (item.title || [''])[0];
-        const year     = (item.published || item['published-print'] || item['published-online'] || {})['date-parts']?.[0]?.[0] || '';
-        const source   = (item['container-title'] || [''])[0];
-        const typeMap  = { 'journal-article':'journal','book':'book','proceedings-article':'conference','dissertation':'thesis' };
-        const detected = typeMap[item.type] || 'journal';
-
-        fillFormFromCrossRef({
-            author:   authors,
-            title,
-            year:     String(year),
-            source,
-            volume:   item.volume || '',
-            issue:    item.issue  || '',
-            pages:    item.page   || '',
-            url:      item.DOI ? `https://doi.org/${item.DOI}` : '',
-            detected,
-        });
-
-        closeSearchResults();
-        keywordInput.value = '';
-
-        // Scroll ke form agar user langsung lihat hasil pengisian
-        document.getElementById('citation-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        const shortTitle = title.length > 50 ? title.slice(0, 50) + '…' : title;
-        toast('Form berhasil diisi!', 'success', 3500, shortTitle);
-    };
-
-    /* ====================================================
-       HELPER: ISI FORM DARI DATA CROSSREF
-       Dipakai bersama oleh DOI fetch DAN keyword search
-    ==================================================== */
-    function fillFormFromCrossRef({ author, title, year, source, volume, issue, pages, url, detected }) {
-        document.getElementById('input-author').value = author;
-        document.getElementById('input-title').value  = title;
-        document.getElementById('input-year').value   = year;
-        document.getElementById('input-source').value = source;
-
-        // Switch tipe sumber
-        sourceBtns.forEach(b => { b.classList.remove('active'); if (b.dataset.type === detected) b.classList.add('active'); });
-        currentSourceType = detected;
-        updateFormFields();
-
-        // Isi field opsional setelah form di-update
-        const setVal = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
-        setVal('input-volume', volume);
-        setVal('input-issue',  issue);
-        setVal('input-pages',  pages);
-        setVal('input-url',    url);
     }
 
     /* ====================================================
@@ -694,33 +483,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateHistoryCount();
     }
 
-    /* ====================================================
-       RENUMBER IEEE OTOMATIS
-    ==================================================== */
-    function renumberIEEE() {
-        const ieeeItems = citationHistory
-            .filter(item => item.type === 'IEEE')
-            .sort((a, b) => (a.ieeeNum || 0) - (b.ieeeNum || 0));
-
-        let changed = false;
-        ieeeItems.forEach((item, i) => {
-            const newNum = i + 1;
-            if (item.ieeeNum !== newNum) {
-                item.text    = item.text.replace(/^\[\d+\]/, `[${newNum}]`);
-                item.ieeeNum = newNum;
-                changed = true;
-            }
-        });
-
-        const newCounter = ieeeItems.length;
-        if (ieeeCounter !== newCounter) {
-            ieeeCounter = newCounter;
-            localStorage.setItem('ieee_counter', String(ieeeCounter));
-        }
-
-        return changed;
-    }
-
     function renderHistory() {
         historyList.innerHTML = '';
         if (!citationHistory.length) {
@@ -728,10 +490,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         citationHistory.forEach((item, idx) => {
-            const isIEEE     = item.type === 'IEEE';
-            const badgeColor = isIEEE ? '#569CD6' : '#C586C0';
-            const numLabel   = isIEEE && item.ieeeNum
-                ? `<span style="color:#4EC9B0;font-size:0.9rem;font-weight:700;">[${item.ieeeNum}]</span>` : '';
+            const isIEEE   = item.type === 'IEEE';
+            const badgeColor = isIEEE ? 'var(--color-info)' : 'var(--color-success)';
+            const numLabel = isIEEE && item.ieeeNum
+                ? `<span style="color:var(--color-success);font-size:0.9rem;font-weight:700;">[${item.ieeeNum}]</span>` : '';
             historyList.innerHTML += `
                 <div class="history-item">
                     <div style="flex:1;min-width:0;">
@@ -743,8 +505,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="history-text" id="hist-text-${idx}">${item.text}</p>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
-                        <button class="btn icon-btn" onclick="copyHistory(${idx})"   title="Salin"><i class='bx bx-copy'></i></button>
-                        <button class="btn icon-btn" onclick="deleteHistory(${idx})" title="Hapus" style="color:#8C3A3A;border-color:#8C3A3A;"><i class='bx bx-trash'></i></button>
+                        <button class="btn icon-btn" onclick="copyHistory(${idx})" title="Salin"><i class='bx bx-copy'></i></button>
+                        <button class="btn icon-btn" onclick="deleteHistory(${idx})" title="Hapus" style="color:var(--color-error);border-color:var(--color-error);"><i class='bx bx-trash'></i></button>
                     </div>
                 </div>`;
         });
@@ -762,29 +524,22 @@ document.addEventListener('DOMContentLoaded', () => {
     window.copyHistory = idx => {
         const text = document.getElementById(`hist-text-${idx}`)?.innerText;
         if (!text) return;
-        navigator.clipboard.writeText(text).then(() => toast('Sitasi disalin ke clipboard!', 'success', 2500));
+        navigator.clipboard.writeText(text)
+            .then(() => toast('Sitasi disalin ke clipboard!', 'success', 2500));
     };
 
     window.deleteHistory = async idx => {
-        const deletedItem = citationHistory[idx];
         const ok = await showConfirm(
             'Hapus sitasi ini?',
             'Sitasi akan dihapus dari riwayat. Tindakan ini tidak dapat dibatalkan.',
             'Hapus'
         );
         if (!ok) return;
-
         citationHistory.splice(idx, 1);
-        const wasRenumbered = renumberIEEE();
         localStorage.setItem('citation_history', JSON.stringify(citationHistory));
         renderHistory();
         updateHistoryCount();
-
-        if (deletedItem?.type === 'IEEE' && wasRenumbered) {
-            toast('Sitasi dihapus & nomor IEEE diperbarui', 'info', 3000, 'Penomoran [1][2][3] telah disesuaikan ulang.');
-        } else {
-            toast('Sitasi dihapus dari riwayat.', 'info', 2500);
-        }
+        toast('Sitasi dihapus dari riwayat.', 'info', 2500);
     };
 
     btnClearHistory.addEventListener('click', async () => {
@@ -817,11 +572,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const key  = (d.author || 'unknown').split(/[\s,]/)[0].replace(/[^a-zA-Z]/g, '') + (d.year || '0000');
             const type = { journal:'@article', book:'@book', conference:'@inproceedings', website:'@misc', thesis:'@mastersthesis' }[item.sourceType || 'journal'] || '@misc';
             bib += `${type}{${key}_${i + 1},\n  author = {${d.author || ''}},\n  title  = {${d.title  || ''}},\n  year   = {${d.year   || ''}},\n`;
-            if      (item.sourceType === 'book')       { bib += `  publisher = {${d.source || ''}},\n`; if (d.city) bib += `  address = {${d.city}},\n`; }
-            else if (item.sourceType === 'conference') { bib += `  booktitle = {${d.source || ''}},\n`; if (d.confPages) bib += `  pages = {${d.confPages}},\n`; }
-            else if (item.sourceType === 'website')    { bib += `  howpublished = {\\url{${d.webUrl || ''}}},\n`; }
-            else if (item.sourceType === 'thesis')     { bib += `  school = {${d.source || ''}},\n  type = {${d.thesisType || 'Skripsi'}},\n`; }
-            else { bib += `  journal = {${d.source || ''}},\n`; if (d.volume) bib += `  volume = {${d.volume}},\n`; if (d.issue) bib += `  number = {${d.issue}},\n`; if (d.pages) bib += `  pages = {${d.pages}},\n`; }
+            if (item.sourceType === 'book') {
+                bib += `  publisher = {${d.source || ''}},\n`;
+                if (d.city) bib += `  address = {${d.city}},\n`;
+            } else if (item.sourceType === 'conference') {
+                bib += `  booktitle = {${d.source || ''}},\n`;
+                if (d.confPages) bib += `  pages = {${d.confPages}},\n`;
+            } else if (item.sourceType === 'website') {
+                bib += `  howpublished = {\\url{${d.webUrl || ''}}},\n`;
+            } else if (item.sourceType === 'thesis') {
+                bib += `  school = {${d.source || ''}},\n  type = {${d.thesisType || 'Skripsi'}},\n`;
+            } else {
+                bib += `  journal = {${d.source || ''}},\n`;
+                if (d.volume) bib += `  volume = {${d.volume}},\n`;
+                if (d.issue)  bib += `  number = {${d.issue}},\n`;
+                if (d.pages)  bib += `  pages  = {${d.pages}},\n`;
+            }
             if (d.url) bib += `  url = {${d.url}},\n`;
             bib += `}\n\n`;
         });
@@ -880,4 +646,4 @@ document.addEventListener('DOMContentLoaded', () => {
     updateHistoryCount();
     updateFormFields();
 
-}); // ← Satu-satunya penutup DOMContentLoaded
+});
