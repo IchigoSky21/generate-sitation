@@ -11,7 +11,7 @@ Aplikasi web statis berbasis *Client-Side* untuk menyusun dan mengelola daftar p
 
 Sangat ideal untuk penyusunan sitasi pada karya tulis ilmiah yang menuntut format referensi ketat (IEEE / APA).
 
-🌐 **[Coba Aplikasi Langsung (Live Demo)]((https://generate-sitation-app.vercel.app/))**
+🌐 **[Coba Aplikasi Langsung (Live Demo)](https://generate-sitation-app.vercel.app/)**
 
 ---
 
