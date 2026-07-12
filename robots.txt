@@ -2,7 +2,8 @@
 # https://ichigosky21.github.io/generate-sitation/
 
 User-agent: *
-Allow: /generate-sitation/
+Allow: /
+Sitemap: https://generator-sitasi.vercel.app/sitemap.xml
 
 # Blokir file aset internal (tidak perlu diindeks)
 Disallow: /generate-sitation/sw.js
