@@ -7,7 +7,7 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 ![PWA](https://img.shields.io/badge/PWA-Ready-blueviolet?style=for-the-badge&logo=pwa)
 
-Aplikasi web statis berbasis *Client-Side* untuk menyusun dan mengelola daftar pustaka secara otomatis. Dirancang dengan antarmuka bergaya **Library Card Catalog** hangat, klasik, dan mendukung **Dark Mode** aplikasi ini mempercepat produktivitas penyusunan referensi akademik untuk laporan tugas kelompok, tugas akhir, hingga draf paper riset.
+Aplikasi web statis berbasis *Client-Side* untuk menyusun dan mengelola daftar pustaka secara otomatis. Dirancang dengan antarmuka bergaya **Meja Kerja Akademik** — modern, informatif, dan mendukung **Dark Mode** — aplikasi ini mempercepat produktivitas penyusunan referensi akademik untuk laporan tugas kelompok, tugas akhir, hingga draf paper riset.
 
 Sangat ideal untuk penyusunan sitasi pada karya tulis ilmiah yang menuntut format referensi ketat (IEEE / APA).
 
@@ -21,7 +21,8 @@ Sangat ideal untuk penyusunan sitasi pada karya tulis ilmiah yang menuntut forma
 | Fitur | Deskripsi |
 |---|---|
 | **DOI Auto-Fill** | Tempel DOI jurnal → metadata (Penulis, Judul, Tahun, Jurnal, Volume, Issue, Halaman) terisi otomatis via CrossRef API |
-| **Keyword Search** | Ketik judul atau kata kunci → sistem mencari di CrossRef dan menampilkan daftar hasil → pilih satu → form terisi otomatis |
+| **Deteksi DOI dari PDF** | Seret (drag & drop) atau pilih file PDF jurnal → sistem membaca 3 halaman pertama & metadata file untuk menemukan DOI, lalu auto-fill otomatis |
+| **Keyword Search** | Ketik judul atau kata kunci → sistem mencari di CrossRef (jurnal/artikel) atau **Google Books** (saat tipe sumber Buku dipilih) → pilih dari hasil → form terisi otomatis |
 | **5 Tipe Sumber** | Mendukung: Artikel Jurnal, Buku, Prosiding Konferensi, Website, dan Skripsi/Tesis dengan form yang menyesuaikan secara dinamis |
 | **Input Manual** | Isi form secara manual jika DOI tidak tersedia |
 
@@ -43,16 +44,18 @@ Sangat ideal untuk penyusunan sitasi pada karya tulis ilmiah yang menuntut forma
 | **Renumber IEEE Otomatis** | Setelah item dihapus, nomor IEEE yang tersisa langsung diperbarui ulang tanpa gap: `[1][3]` → `[1][2]` |
 | **Hapus Per-Item** | Hapus satu sitasi tertentu dari riwayat tanpa menghapus semua |
 
-### 📤 Export
+### 📤 Export & Import
 | Fitur | Deskripsi |
 |---|---|
 | **Export BibTeX** | Unduh file `.bib` dengan entry type yang tepat per tipe sumber (`@article`, `@book`, `@inproceedings`, `@misc`, `@mastersthesis`) siap pakai di Mendeley, Zotero, atau EndNote |
+| **Import BibTeX** | Punya file `.bib` dari Mendeley/Zotero? Import langsung ke riwayat sebagai sitasi IEEE (best-effort, mendukung banyak entri, multi-author, dan format `Nama Belakang, Nama Depan`) |
 | **Export TXT** | Unduh file `.txt` terstruktur (IEEE dan APA dipisahkan) untuk langsung *paste* ke Microsoft Word |
+| **Export/Import Project Bundle (.json)** | Bagikan seluruh riwayat sitasi ke anggota kelompok tanpa server cukup export file `.json`, kirim ke teman, mereka tinggal import untuk menggabungkan (merge, bukan menimpa) riwayat mereka |
 
 ### 🎨 Tampilan & UX
 | Fitur | Deskripsi |
 |---|---|
-| **Library Card Catalog Theme** | Palet hangat krem/mahoni/karamel dengan font Lora serif konsisten di light dan dark mode |
+| **Meja Kerja Akademik Theme** | Palet indigo & amber yang konsisten di light dan dark mode; font **Inter** (sans) untuk seluruh antarmuka/tombol, font **Lora** (serif) khusus untuk teks hasil sitasi memisahkan "kontrol" dari "konten dokumen" secara visual |
 | **Dark / Light Mode** | Toggle tema di pojok kanan atas viewport; preferensi tersimpan dan langsung diterapkan tanpa *flash* (Anti-FOUC) |
 | **Toast Notifications** | Semua `alert()` diganti dengan notifikasi non-blocking di pojok layar; progress bar + tombol tutup manual |
 | **Custom Confirm Dialog** | Semua `confirm()` diganti dengan dialog modal bergaya yang mendukung tema, keyboard (Enter/Escape), dan klik di luar |
@@ -74,10 +77,13 @@ Dibangun *Native/Vanilla* tanpa framework eksternal ringan, tidak ada dependensi
 | Teknologi | Kegunaan |
 |---|---|
 | **HTML5** | Struktur antarmuka dan form semantik yang berubah dinamis sesuai tipe sumber |
-| **CSS3** | Library Card Catalog theme dengan CSS Variables, Flexbox, dark/light mode, dan transisi halus |
-| **Vanilla JavaScript** | `async/await` untuk API fetching, algoritma parsing nama, DOM API, Local Storage API, Blob API |
-| **CrossRef REST API** | Sumber data publik untuk DOI lookup (`/works/{DOI}`) dan keyword search (`/works?query=...`) |
-| **Lora** | Typeface serif hangat via Google Fonts dipakai di kedua mode (light & dark) |
+| **CSS3** | Tema Meja Kerja Akademik dengan CSS Variables, Flexbox, dark/light mode, dan transisi halus |
+| **Vanilla JavaScript** | `async/await` untuk API fetching, algoritma parsing nama, DOM API, Local Storage API, Blob API, File API |
+| **CrossRef REST API** | Sumber data publik untuk DOI lookup (`/works/{DOI}`) dan keyword search jurnal/artikel (`/works?query=...`) |
+| **Google Books API** | Fallback keyword search khusus tipe sumber Buku (`/books/v1/volumes?q=...`), karena CrossRef kurang kuat untuk data buku |
+| **pdf.js (Mozilla)** | Dimuat *lazy* dari CDN hanya saat fitur drag & drop PDF dipakai; membaca teks & metadata PDF untuk mendeteksi DOI otomatis |
+| **Inter** | Typeface sans-serif via Google Fonts untuk seluruh elemen antarmuka (tombol, label, navigasi) |
+| **Lora** | Typeface serif via Google Fonts, dipakai khusus untuk teks hasil sitasi & riwayat agar visualnya beda dari elemen UI |
 | **BoxIcons** | Library ikon via CDN (`unpkg.com/boxicons`) |
 | **Service Worker** | Cache aset untuk penggunaan offline dan peningkatan performa |
 
@@ -94,7 +100,8 @@ Dibangun *Native/Vanilla* tanpa framework eksternal ringan, tidak ada dependensi
    | Cara | Kapan Digunakan |
    |---|---|
    | **DOI Auto-Fill** | Kamu sudah punya kode DOI jurnal (misal: `10.1109/TITS.2024.xxx`) |
-   | **Keyword Search** | Kamu hanya tahu judul atau topik ketik keyword, pilih dari hasil |
+   | **Seret File PDF** | Kamu punya file PDF jurnal tapi belum tahu/malas cari kode DOI-nya |
+   | **Keyword Search** | Kamu hanya tahu judul atau topik ketik keyword, pilih dari hasil (CrossRef untuk jurnal, Google Books untuk buku) |
    | **Manual** | Sumber tidak memiliki DOI (buku tua, skripsi, website) |
 
 3. Pilih **Tipe Sumber** (Jurnal / Buku / Konferensi / Website / Skripsi), lalu lengkapi field yang muncul.
@@ -107,11 +114,13 @@ Dibangun *Native/Vanilla* tanpa framework eksternal ringan, tidak ada dependensi
 
 7. Klik **Export .TXT** atau **Export BibTeX** saat semua referensi sudah terkumpul.
 
+> **Sudah punya daftar pustaka dari aplikasi lain?** Klik **Import .bib** untuk membawa masuk file BibTeX dari Mendeley/Zotero. Untuk kerja kelompok, satu anggota bisa **Export Bundle** (.json) lalu anggota lain **Import Bundle** untuk menggabungkan riwayat tanpa perlu server/akun bersama.
+
 ---
 
 ### Menjalankan Secara Lokal
 
-Tidak perlu server lokal — cukup buka file HTML langsung di browser.
+Tidak perlu server lokal cukup buka file HTML langsung di browser.
 
 ```bash
 # 1. Clone repository ini
@@ -124,7 +133,7 @@ cd generate-sitation
 #    Klik dua kali file index.html, atau gunakan Live Server di VS Code
 ```
 
-> **Catatan:** Fitur DOI Auto-Fill dan Keyword Search memerlukan koneksi internet aktif karena memanggil CrossRef API secara langsung dari browser.
+> **Catatan:** Fitur DOI Auto-Fill, Keyword Search, dan Google Books memerlukan koneksi internet aktif karena memanggil API pihak ketiga langsung dari browser. Fitur deteksi DOI dari PDF juga memerlukan koneksi saat pertama kali dipakai (untuk memuat library `pdf.js` dari CDN).
 
 ---
 
@@ -168,8 +177,8 @@ Goodfellow, I., Bengio, Y., & Courville, A. (2016). Deep learning. MIT Press.
 ```
 generate-sitation/
 ├── index.html       # Antarmuka utama + semua elemen form + keyword search
-├── style.css        # Library Card Catalog theme, dark mode, toast, confirm dialog, search panel
-├── app.js           # Logika: generator sitasi, DOI fetch, keyword search, history, export, dark mode
+├── style.css        # Tema Meja Kerja Akademik, dark mode, toast, confirm dialog, search panel, PDF dropzone
+├── app.js           # Logika: generator sitasi, DOI fetch (teks & PDF), keyword search, import/export .bib & bundle, history, dark mode
 ├── sw.js            # Service Worker untuk PWA & caching offline
 ├── manifest.json    # PWA manifest (nama, ikon, warna tema)
 ├── sitemap.xml      # Sitemap untuk SEO
@@ -195,6 +204,9 @@ generate-sitation/
 | **v6 — Tema & PWA** | Library Card Catalog theme, dark/light mode toggle, PWA, SEO lengkap |
 | **v7 — Renumber** | Auto-renumber IEEE setelah hapus, sinkronisasi `ieeeCounter` |
 | **v8 — Search** | **Keyword Search via CrossRef** cari jurnal by keyword, pilih dari hasil, form terisi otomatis |
+| **v9 — Keamanan & Stabilitas** | Perbaikan celah XSS pada riwayat sitasi & notifikasi (escaping HTML), perbaikan *memory leak* pada dialog konfirmasi, escaping karakter khusus di export BibTeX, timeout pada permintaan DOI |
+| **v10 — Tema Baru** | Desain ulang tema jadi **Meja Kerja Akademik**: palet indigo/amber konsisten light-dark, font Inter (UI) + Lora (konten sitasi), signature aksen garis di setiap kartu |
+| **v11 — Import/Export & Sumber Baru** | **Import BibTeX**, **Export/Import Project Bundle** untuk kerja kelompok, fallback **Google Books** untuk tipe sumber Buku, **deteksi DOI dari file PDF** (drag & drop), perbaikan tampilan form multi-kolom yang melebihi batas kartu |
 
 ---
 
@@ -214,7 +226,7 @@ Untuk bug yang ditemukan, silakan buka [Issue baru](https://github.com/IchigoSky
 
 ## 📄 Lisensi
 
-Proyek ini dilisensikan di bawah **MIT License** — bebas digunakan, dimodifikasi, dan didistribusikan untuk keperluan apapun selama mencantumkan atribusi aslinya. Lihat file [LICENSE](LICENSE) untuk detail lengkap.
+Proyek ini dilisensikan di bawah **MIT License** bebas digunakan, dimodifikasi, dan didistribusikan untuk keperluan apapun selama mencantumkan atribusi aslinya. Lihat file [LICENSE](LICENSE) untuk detail lengkap.
 
 ---
 
