@@ -56,6 +56,11 @@
                         <input type="text" id="input-doi-quick" placeholder="Contoh: 10.1109/TITS.2024..." style="flex: 1;">
                         <button type="button" id="btn-doi-fetch" class="btn btn-secondary"><i class='bx bx-bolt-circle'></i> Auto-Fill</button>
                     </div>
+                    <div id="pdf-dropzone" class="pdf-dropzone" tabindex="0" role="button" aria-label="Seret file PDF ke sini, atau klik untuk memilih file">
+                        <i class='bx bx-file-find' aria-hidden="true"></i>
+                        <span>Seret file PDF ke sini untuk deteksi DOI otomatis, atau <u>klik untuk memilih file</u></span>
+                    </div>
+                    <input type="file" id="input-pdf-doi" accept="application/pdf,.pdf" class="hidden" aria-hidden="true">
                 </div>
 
                 <div class="form-group" style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px dashed var(--border); position: relative;">
@@ -64,6 +69,7 @@
                         <input type="text" id="input-title-search" placeholder="Contoh: pothole detection using classical machine learning" style="flex: 1;" autocomplete="off">
                         <button type="button" id="btn-title-search" class="btn btn-secondary"><i class='bx bx-search-alt'></i> Cari</button>
                     </div>
+                    <p id="search-source-hint" class="text-muted" style="margin-top:6px;font-size:0.8rem;">Mencari via CrossRef (jurnal/artikel).</p>
                     <div id="search-results" class="search-results hidden" role="listbox" aria-label="Hasil pencarian sitasi"></div>
                 </div>
 
@@ -171,10 +177,15 @@
                 <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
                     <h2><i class='bx bx-history text-primary'></i> Riwayat Daftar Pustaka <span id="history-count" style="color: var(--text-muted);"></span></h2>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button id="btn-import-bibtex" class="btn btn-secondary" style="padding: 8px 12px; font-size: 0.8rem;"><i class='bx bx-import'></i> Import .bib</button>
+                        <button id="btn-export-bundle" class="btn btn-secondary" style="padding: 8px 12px; font-size: 0.8rem;"><i class='bx bx-package'></i> Export Bundle</button>
+                        <button id="btn-import-bundle" class="btn btn-secondary" style="padding: 8px 12px; font-size: 0.8rem;"><i class='bx bx-upload'></i> Import Bundle</button>
                         <button id="btn-export-txt" class="btn btn-secondary" style="padding: 8px 12px; font-size: 0.8rem;"><i class='bx bx-file-blank'></i> .TXT</button>
                         <button id="btn-export-bibtex" class="btn btn-success" style="padding: 8px 12px; font-size: 0.8rem;"><i class='bx bxs-file-export'></i> BibTeX</button>
                         <button id="btn-clear-history" class="btn btn-secondary" style="padding: 8px 12px; font-size: 0.8rem; background: var(--color-error); color: white; border: none;"><i class='bx bx-trash'></i> Kosongkan</button>
                     </div>
+                    <input type="file" id="input-import-bibtex" accept=".bib,.bibtex,text/plain" class="hidden" aria-hidden="true">
+                    <input type="file" id="input-import-bundle" accept=".json,application/json" class="hidden" aria-hidden="true">
                 </div>
                 <div id="history-list" class="history-container"></div>
             </div>

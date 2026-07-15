@@ -20,6 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const titleSearchInput = document.getElementById('input-title-search');
     const btnTitleSearch   = document.getElementById('btn-title-search');
     const searchResultsEl  = document.getElementById('search-results');
+    const searchSourceHint = document.getElementById('search-source-hint');
+    const pdfDropzone      = document.getElementById('pdf-dropzone');
+    const inputPdfDoi      = document.getElementById('input-pdf-doi');
+    const btnImportBibtex  = document.getElementById('btn-import-bibtex');
+    const inputImportBibtex = document.getElementById('input-import-bibtex');
+    const btnExportBundle  = document.getElementById('btn-export-bundle');
+    const btnImportBundle  = document.getElementById('btn-import-bundle');
+    const inputImportBundle = document.getElementById('input-import-bundle');
 
     /* ====================================================
        HTML ESCAPING (XSS PREVENTION)
@@ -152,12 +160,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const iconWrap = document.getElementById('conf-icon-wrap');
             const icon     = document.getElementById('conf-icon');
+            const okBtn    = document.getElementById('conf-ok');
             iconWrap.className = `confirm-icon-wrap confirm-icon-${type}`;
             icon.className = type === 'danger' ? 'bx bx-trash' : 'bx bx-error';
+            okBtn.className = type === 'danger' ? 'btn btn-danger' : 'btn btn-primary';
 
             document.getElementById('conf-title').textContent = title;
             document.getElementById('conf-msg').textContent   = message;
-            document.getElementById('conf-ok').textContent    = confirmLabel;
+            okBtn.textContent = confirmLabel;
 
             function close(result) {
                 document.removeEventListener('keydown', keyHandler);
@@ -168,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, { once: true });
             }
 
-            document.getElementById('conf-ok').onclick     = () => close(true);
+            okBtn.onclick     = () => close(true);
             document.getElementById('conf-cancel').onclick = () => close(false);
             overlay.onclick = e => { if (e.target === overlay) close(false); };
 
@@ -180,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             overlay.style.display = 'flex';
             requestAnimationFrame(() => overlay.classList.add('visible'));
-            document.getElementById('conf-ok').focus();
+            okBtn.focus();
         });
     }
 
@@ -211,6 +221,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.optional-fields').forEach(el => el.classList.add('hidden'));
         const target = document.getElementById(`fields-${currentSourceType}`);
         if (target) target.classList.remove('hidden');
+        if (searchSourceHint) {
+            searchSourceHint.textContent = currentSourceType === 'book'
+                ? 'Mencari via Google Books (buku).'
+                : 'Mencari via CrossRef (jurnal/artikel).';
+        }
     }
 
     /* ====================================================
@@ -291,10 +306,10 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ====================================================
        CITATION BUILDERS
     ==================================================== */
-    function buildIEEE(raw, num) {
+    function buildIEEE(raw, num, sourceType = currentSourceType) {
         const author = formatIEEEAuthors(raw.author, raw.isOrgAuthor);
         const source = toTitleCase(raw.source);
-        switch (currentSourceType) {
+        switch (sourceType) {
             case 'journal': {
                 let c = `[${num}] ${author}, "${toSentenceCase(raw.title)}," ${source}`;
                 if (raw.volume) c += `, vol. ${raw.volume}`;
@@ -339,10 +354,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return '';
     }
 
-    function buildAPA(raw) {
+    function buildAPA(raw, sourceType = currentSourceType) {
         const author = formatAPAAuthors(raw.author, raw.isOrgAuthor);
         const source = toTitleCase(raw.source);
-        switch (currentSourceType) {
+        switch (sourceType) {
             case 'journal': {
                 let c = `${author}. (${raw.year}). ${toSentenceCase(raw.title)}. ${source}`;
                 if (raw.volume && raw.issue) c += `, ${raw.volume}(${raw.issue})`;
@@ -440,14 +455,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyWorkToForm(m) {
         const authors  = (m.author || []).map(a => [a.given, a.family].filter(Boolean).join(' ')).join(', ');
         const year     = (m.published || m['published-print'] || m['published-online'] || {})['date-parts']?.[0]?.[0] || '';
-        const journal  = (m['container-title'] || [''])[0];
         const typeMap  = { 'journal-article':'journal','book':'book','proceedings-article':'conference','dissertation':'thesis' };
         const detected = typeMap[m.type] || 'journal';
+        const source   = detected === 'book' ? (m.publisher || (m['container-title'] || [''])[0] || '') : (m['container-title'] || [''])[0];
 
         document.getElementById('input-author').value = authors;
         document.getElementById('input-title').value  = (m.title || [''])[0];
         document.getElementById('input-year').value   = year;
-        document.getElementById('input-source').value = journal;
+        document.getElementById('input-source').value = source;
 
         sourceBtns.forEach(b => { b.classList.remove('active'); if (b.dataset.type === detected) b.classList.add('active'); });
         currentSourceType = detected;
@@ -502,6 +517,111 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ====================================================
+       PDF DROP ZONE — deteksi DOI otomatis dari file PDF
+       Memuat pdf.js secara lazy (hanya saat dibutuhkan) dari CDN.
+    ==================================================== */
+    const DOI_REGEX = /\b10\.\d{4,9}\/[^\s"'<>]+/;
+    let pdfjsLoadPromise = null;
+
+    function loadPdfJs() {
+        if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+        if (pdfjsLoadPromise) return pdfjsLoadPromise;
+        pdfjsLoadPromise = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js';
+            script.onload = () => {
+                if (!window.pdfjsLib) { reject(new Error('pdf.js gagal dimuat')); return; }
+                window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+                resolve(window.pdfjsLib);
+            };
+            script.onerror = () => reject(new Error('pdf.js gagal dimuat dari CDN'));
+            document.head.appendChild(script);
+        });
+        return pdfjsLoadPromise;
+    }
+
+    function cleanDoiMatch(raw) {
+        // Buang tanda baca penutup yang biasa ikut ter-capture di akhir kalimat/PDF (.,);])
+        return raw.replace(/[.,;:)\]]+$/, '');
+    }
+
+    async function extractDoiFromPdf(file) {
+        const pdfjsLib = await loadPdfJs();
+        const buf = await file.arrayBuffer();
+        const doc = await pdfjsLib.getDocument({ data: buf }).promise;
+
+        try {
+            const meta = await doc.getMetadata();
+            const metaStr = JSON.stringify(meta?.info || {}) + JSON.stringify(meta?.metadata?.getAll?.() || {});
+            const metaMatch = metaStr.match(DOI_REGEX);
+            if (metaMatch) return cleanDoiMatch(metaMatch[0]);
+        } catch { /* metadata tidak wajib ada; lanjut cek isi teks */ }
+
+        const pagesToScan = Math.min(doc.numPages, 3);
+        for (let p = 1; p <= pagesToScan; p++) {
+            const page = await doc.getPage(p);
+            const content = await page.getTextContent();
+            const text = content.items.map(it => it.str).join(' ');
+            const match = text.match(DOI_REGEX);
+            if (match) return cleanDoiMatch(match[0]);
+        }
+        return null;
+    }
+
+    async function handlePdfFile(file) {
+        if (!file || file.type !== 'application/pdf') {
+            toast('File harus berformat PDF', 'warning', 3500, 'Coba seret file dengan ekstensi .pdf.');
+            return;
+        }
+        pdfDropzone.classList.add('dropzone-loading');
+        pdfDropzone.querySelector('span').textContent = 'Membaca PDF & mencari DOI...';
+        try {
+            const doi = await extractDoiFromPdf(file);
+            if (!doi) {
+                toast('DOI tidak ditemukan di PDF', 'warning', 5000, 'Coba salin DOI secara manual dari halaman pertama jurnal, lalu tempel di kolom Auto-Fill.');
+                return;
+            }
+            doiInput.value = doi;
+            toast('DOI ditemukan di PDF!', 'info', 3000, doi);
+            await fetchDOI();
+        } catch (err) {
+            toast('Gagal membaca file PDF', 'error', 5000, 'File mungkin rusak, terenkripsi, atau berupa hasil scan (gambar) tanpa lapisan teks.');
+        } finally {
+            pdfDropzone.classList.remove('dropzone-loading');
+            pdfDropzone.querySelector('span').innerHTML = 'Seret file PDF ke sini untuk deteksi DOI otomatis, atau <u>klik untuk memilih file</u>';
+        }
+    }
+
+    pdfDropzone.addEventListener('click', () => inputPdfDoi.click());
+    pdfDropzone.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inputPdfDoi.click(); }
+    });
+    inputPdfDoi.addEventListener('change', () => {
+        const file = inputPdfDoi.files[0];
+        inputPdfDoi.value = '';
+        if (file) handlePdfFile(file);
+    });
+
+    ['dragenter', 'dragover'].forEach(evt => {
+        pdfDropzone.addEventListener(evt, e => {
+            e.preventDefault(); e.stopPropagation();
+            pdfDropzone.classList.add('dropzone-active');
+        });
+    });
+    ['dragleave', 'dragend'].forEach(evt => {
+        pdfDropzone.addEventListener(evt, e => {
+            e.preventDefault(); e.stopPropagation();
+            pdfDropzone.classList.remove('dropzone-active');
+        });
+    });
+    pdfDropzone.addEventListener('drop', e => {
+        e.preventDefault(); e.stopPropagation();
+        pdfDropzone.classList.remove('dropzone-active');
+        const file = e.dataTransfer?.files?.[0];
+        if (file) handlePdfFile(file);
+    });
+
+    /* ====================================================
        TITLE / KEYWORD SEARCH (CrossRef)
     ==================================================== */
     let searchAbortController = null;
@@ -539,6 +659,41 @@ document.addEventListener('DOMContentLoaded', () => {
         searchResultsEl.classList.remove('hidden');
     }
 
+    async function fetchCrossrefWorks(query, signal) {
+        const url = `https://api.crossref.org/works?query.bibliographic=${encodeURIComponent(query)}&rows=6`;
+        const res = await fetch(url, { signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        return data?.message?.items || [];
+    }
+
+    function googleBookToWorkShape(gb) {
+        const vi = gb.volumeInfo || {};
+        const author = (vi.authors || []).map(full => {
+            const parts  = full.trim().split(/\s+/);
+            const family = parts.length > 1 ? parts.pop() : full.trim();
+            const given  = parts.join(' ');
+            return { given, family };
+        });
+        const yearMatch = (vi.publishedDate || '').match(/\d{4}/);
+        return {
+            title: [vi.subtitle ? `${vi.title || ''}: ${vi.subtitle}` : (vi.title || '')],
+            author,
+            published: { 'date-parts': [[yearMatch ? parseInt(yearMatch[0], 10) : '']] },
+            'container-title': [vi.publisher || ''],
+            type: 'book',
+            URL: vi.infoLink || vi.canonicalVolumeLink || '',
+        };
+    }
+
+    async function fetchGoogleBooks(query, signal) {
+        const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=6`;
+        const res = await fetch(url, { signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        return (data.items || []).map(googleBookToWorkShape);
+    }
+
     async function searchByTitle(query) {
         if (searchAbortController) searchAbortController.abort();
         searchAbortController = new AbortController();
@@ -547,11 +702,9 @@ document.addEventListener('DOMContentLoaded', () => {
         renderSearchState('loading');
 
         try {
-            const url = `https://api.crossref.org/works?query.bibliographic=${encodeURIComponent(query)}&rows=6`;
-            const res = await fetch(url, { signal: searchAbortController.signal });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data  = await res.json();
-            const items = data?.message?.items || [];
+            const items = currentSourceType === 'book'
+                ? await fetchGoogleBooks(query, searchAbortController.signal)
+                : await fetchCrossrefWorks(query, searchAbortController.signal);
             if (!items.length) renderSearchState('empty');
             else renderSearchState('results', items);
         } catch (err) {
@@ -736,6 +889,229 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         downloadFile(bib, `references_${Date.now()}.bib`);
         toast('File BibTeX berhasil diunduh!', 'success', 3000, `${citationHistory.length} entri referensi diekspor.`);
+    });
+
+    /* ====================================================
+       IMPORT: BIBTEX (.bib)
+       Parser best-effort: menangani entri @type{key, field={value}, ...}
+       dengan tanda kurung kurawal/kutip bersarang secara wajar.
+       Tidak mendukung @string macro atau cross-referencing.
+    ==================================================== */
+    function unescapeBibtex(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/\\textbackslash\{\}/g, '\\')
+            .replace(/\\([{}%&#_$])/g, '$1')
+            .replace(/[{}]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function parseBibtexFields(str) {
+        const fields = {};
+        const re = /([A-Za-z][\w-]*)\s*=\s*/g;
+        let m;
+        while ((m = re.exec(str))) {
+            const name = m[1].toLowerCase();
+            let i = re.lastIndex;
+            while (i < str.length && /\s/.test(str[i])) i++;
+            let value = '';
+            if (str[i] === '{') {
+                let depth = 1; i++; const start = i;
+                while (depth > 0 && i < str.length) {
+                    if (str[i] === '{') depth++;
+                    else if (str[i] === '}') depth--;
+                    i++;
+                }
+                value = str.slice(start, i - 1);
+            } else if (str[i] === '"') {
+                i++; const start = i;
+                while (i < str.length && str[i] !== '"') i++;
+                value = str.slice(start, i);
+                i++;
+            } else {
+                const start = i;
+                while (i < str.length && str[i] !== ',') i++;
+                value = str.slice(start, i).trim();
+            }
+            fields[name] = unescapeBibtex(value);
+            re.lastIndex = i;
+        }
+        return fields;
+    }
+
+    function parseBibtex(content) {
+        const entries = [];
+        const re = /@([A-Za-z]+)\s*\{/g;
+        let m;
+        while ((m = re.exec(content))) {
+            const type = m[1].toLowerCase();
+            if (type === 'string' || type === 'comment' || type === 'preamble') continue;
+            let i = re.lastIndex, depth = 1;
+            const start = i;
+            while (depth > 0 && i < content.length) {
+                if (content[i] === '{') depth++;
+                else if (content[i] === '}') depth--;
+                i++;
+            }
+            const body = content.slice(start, i - 1);
+            const commaIdx = body.indexOf(',');
+            if (commaIdx === -1) { re.lastIndex = i; continue; }
+            entries.push({ type, fields: parseBibtexFields(body.slice(commaIdx + 1)) });
+            re.lastIndex = i;
+        }
+        return entries;
+    }
+
+    function bibtexAuthorsToRaw(bibAuthorStr) {
+        if (!bibAuthorStr) return '';
+        return bibAuthorStr.split(/\s+and\s+/i).map(a => {
+            a = a.trim();
+            if (a.includes(',')) {
+                const [fam, given] = a.split(',').map(s => s.trim());
+                return given ? `${given} ${fam}` : fam;
+            }
+            return a;
+        }).filter(Boolean).join(', ');
+    }
+
+    const BIBTEX_TYPE_TO_SOURCE = {
+        article: 'journal', techreport: 'journal',
+        book: 'book', inbook: 'book',
+        inproceedings: 'conference', conference: 'conference', proceedings: 'conference',
+        mastersthesis: 'thesis', phdthesis: 'thesis',
+        misc: 'website', online: 'website', webpage: 'website',
+    };
+
+    function bibtexEntryToRaw(entry) {
+        const f = entry.fields;
+        const sourceType = BIBTEX_TYPE_TO_SOURCE[entry.type] || 'journal';
+        const urlFromHowpublished = (f.howpublished || '').match(/\\url\{([^}]+)\}/)?.[1] || f.howpublished || '';
+        const raw = {
+            author: bibtexAuthorsToRaw(f.author),
+            isOrgAuthor: false,
+            title: f.title || '',
+            year: (f.year || '').match(/\d{4}/)?.[0] || f.year || '',
+            source: f.journal || f.publisher || f.booktitle || f.school || '',
+            volume: f.volume || '',
+            issue: f.number || '',
+            pages: f.pages || '',
+            url: f.url || urlFromHowpublished || '',
+            city: f.address || '',
+            edition: f.edition || '',
+            confLocation: '',
+            confPages: f.pages || '',
+            confUrl: f.url || '',
+            webUrl: f.url || urlFromHowpublished || '',
+            accessDate: '',
+            thesisType: f.type ? toTitleCase(f.type) : 'Skripsi',
+            thesisUrl: f.url || '',
+        };
+        return { raw, sourceType };
+    }
+
+    function importBibtexEntries(entries) {
+        let success = 0, skipped = 0;
+        entries.forEach(entry => {
+            const { raw, sourceType } = bibtexEntryToRaw(entry);
+            if (!raw.author || !raw.title) { skipped++; return; }
+            try {
+                ieeeCounter++;
+                localStorage.setItem('ieee_counter', String(ieeeCounter));
+                const text = buildIEEE(raw, ieeeCounter, sourceType);
+                citationHistory.unshift({ id: Date.now() + success, text, type: 'IEEE', rawData: raw, sourceType, ieeeNum: ieeeCounter });
+                success++;
+            } catch { skipped++; }
+        });
+        localStorage.setItem('citation_history', JSON.stringify(citationHistory));
+        renderHistory();
+        updateHistoryCount();
+        return { success, skipped };
+    }
+
+    btnImportBibtex.addEventListener('click', () => inputImportBibtex.click());
+    inputImportBibtex.addEventListener('change', async () => {
+        const file = inputImportBibtex.files[0];
+        inputImportBibtex.value = '';
+        if (!file) return;
+        try {
+            const content = await file.text();
+            const entries = parseBibtex(content);
+            if (!entries.length) {
+                toast('Tidak ada entri valid ditemukan', 'warning', 4000, 'Pastikan file .bib berisi entri @article, @book, dsb.');
+                return;
+            }
+            const { success, skipped } = importBibtexEntries(entries);
+            if (success) {
+                toast('Import BibTeX selesai!', 'success', 4000, `${success} entri diimpor sebagai IEEE${skipped ? `, ${skipped} dilewati (data tidak lengkap)` : ''}. Hasil bersifat best-effort, cek kembali sebelum dipakai.`);
+            } else {
+                toast('Tidak ada entri yang berhasil diimpor', 'error', 4000, 'Field penulis/judul mungkin kosong di semua entri.');
+            }
+        } catch (err) {
+            toast('Gagal membaca file .bib', 'error', 4000, 'Pastikan file tidak rusak dan berformat teks biasa.');
+        }
+    });
+
+    /* ====================================================
+       EXPORT / IMPORT: PROJECT BUNDLE (.json)
+       Untuk berbagi riwayat sitasi antar anggota kelompok
+       tanpa server — cukup kirim file .json ke teman.
+    ==================================================== */
+    btnExportBundle.addEventListener('click', () => {
+        if (!citationHistory.length) {
+            toast('Tidak ada sitasi untuk diekspor!', 'warning', 3000, 'Generate minimal satu sitasi terlebih dahulu.');
+            return;
+        }
+        const bundle = {
+            bundleType: 'generator-sitasi-project-bundle',
+            version: 1,
+            exportedAt: new Date().toISOString(),
+            citationHistory,
+        };
+        downloadFile(JSON.stringify(bundle, null, 2), `sitasi-bundle_${Date.now()}.json`);
+        toast('Project Bundle berhasil diunduh!', 'success', 3000, `${citationHistory.length} entri. Kirim file ini ke anggota kelompok untuk digabungkan.`);
+    });
+
+    btnImportBundle.addEventListener('click', () => inputImportBundle.click());
+    inputImportBundle.addEventListener('change', async () => {
+        const file = inputImportBundle.files[0];
+        inputImportBundle.value = '';
+        if (!file) return;
+        try {
+            const content = await file.text();
+            const bundle = JSON.parse(content);
+            if (!bundle || !Array.isArray(bundle.citationHistory)) {
+                toast('File bundle tidak valid', 'error', 4000, 'Pastikan file berasal dari fitur Export Bundle di aplikasi ini.');
+                return;
+            }
+            const ok = await showConfirm(
+                'Gabungkan Project Bundle?',
+                `Bundle ini berisi ${bundle.citationHistory.length} entri sitasi. Entri akan ditambahkan ke riwayat kamu saat ini (tidak menimpa/menghapus yang sudah ada).`,
+                'Gabungkan', 'warn'
+            );
+            if (!ok) return;
+
+            let merged = 0, renumbered = 0;
+            bundle.citationHistory.forEach(item => {
+                if (!item || !item.text || !item.rawData) return;
+                let entry = { ...item, id: Date.now() + merged };
+                if (entry.type === 'IEEE') {
+                    ieeeCounter++;
+                    localStorage.setItem('ieee_counter', String(ieeeCounter));
+                    entry.text = buildIEEE(entry.rawData, ieeeCounter, entry.sourceType);
+                    entry.ieeeNum = ieeeCounter;
+                    renumbered++;
+                }
+                citationHistory.unshift(entry);
+                merged++;
+            });
+            localStorage.setItem('citation_history', JSON.stringify(citationHistory));
+            renderHistory();
+            updateHistoryCount();
+            toast('Bundle berhasil digabungkan!', 'success', 4000, `${merged} entri ditambahkan${renumbered ? `, nomor IEEE disesuaikan otomatis` : ''}.`);
+        } catch (err) {
+            toast('Gagal membaca file bundle', 'error', 4000, 'Pastikan file JSON tidak rusak.');
+        }
     });
 
     btnExportTxt.addEventListener('click', () => {

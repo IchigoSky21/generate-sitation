@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sitasi-cache-v10';
+const CACHE_NAME = 'sitasi-cache-v11';
 const urlsToCache = [
     '/',
     '/index.html',
