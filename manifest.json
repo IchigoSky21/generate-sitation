@@ -4,8 +4,8 @@
   "description": "Generator sitasi IEEE dan APA cerdas, berjalan secara offline.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#0E639C",
+  "background_color": "#F7F6F2",
+  "theme_color": "#35508C",
   "icons": [
     {
       "src": "icon-192.png",

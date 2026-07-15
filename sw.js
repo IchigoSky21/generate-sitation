@@ -1,11 +1,11 @@
-const CACHE_NAME = 'sitasi-cache-v9';
+const CACHE_NAME = 'sitasi-cache-v10';
 const urlsToCache = [
     '/',
     '/index.html',
     '/style.css',
     '/app.js',
     '/manifest.json',
-    'https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap',
+    'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap',
     'https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css'
 ];
 

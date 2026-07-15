@@ -1,79 +1,86 @@
 /* =========================================================
    TEMA UTAMA (CSS VARIABLES MAPPING)
+   "Meja Kerja Akademik" — sans untuk UI, serif untuk output sitasi
 ========================================================= */
 
-/* 1. LIGHT MODE (LIBRARY CARD CATALOG) - DEFAULT */
+/* 1. LIGHT MODE - DEFAULT */
 :root {
-    --bg-main: #F3E9D2; 
-    --surface: #FDFBF7; 
-    --text-dark: #2C1810; 
-    --text-muted: #6B3A1F; 
-    --primary: #6B3A1F; 
-    --primary-hover: #4A2714;
-    --secondary: #E3D5BA; 
-    --secondary-hover: #D4C4A3;
-    --success: #D4863A; 
-    --border: #C8B69A;
-    --radius-lg: 6px;
-    --radius-md: 4px; 
-    
-    --main-font: 'Lora', serif;
-    --bg-pattern: repeating-linear-gradient(45deg, rgba(200, 182, 154, 0.05) 0px, rgba(200, 182, 154, 0.05) 2px, transparent 2px, transparent 4px);
-    --header-border: 2px dashed var(--border);
-    --header-icon: var(--success);
-    --shadow-card: 2px 2px 8px rgba(44, 24, 16, 0.08);
-    --history-bg: repeating-linear-gradient(transparent, transparent 29px, rgba(200, 182, 154, 0.3) 30px);
-    
-    --btn-active-bg: var(--surface);
-    --btn-active-color: var(--success);
-    --btn-active-shadow: 0 2px 4px rgba(212, 134, 58, 0.1);
+    --bg-main: #F7F6F2;
+    --surface: #FFFFFF;
+    --text-dark: #1C1C1A;
+    --text-muted: #6E6D66;
+    --primary: #35508C;
+    --primary-hover: #293F6E;
+    --secondary: #EEF0F4;
+    --secondary-hover: #E2E5EC;
+    --success: #C97F2E;
+    --border: #DCDAD2;
+    --radius-lg: 10px;
+    --radius-md: 8px;
 
-    --color-success: #3E5A44;
-    --color-error: #8C3A3A;
-    --color-warn: #D4863A;
-    --color-info: #6B3A1F;
-    --bg-error-light: rgba(140, 58, 58, 0.12);
-    --bg-warn-light: rgba(212, 134, 58, 0.12);
-    
-    --overlay-bg: rgba(44, 24, 16, 0.45);
-    --btn-danger-bg: #8C3A3A;
-    --btn-danger-hover: #6B2B2B;
-}
+    --ui-font: 'Inter', sans-serif;
+    --content-font: 'Lora', serif;
+    --main-font: var(--ui-font);
 
-/* 2. DARK MODE (DARK IDE / VS CODE) */
-[data-theme="dark"] {
-    --bg-main: #121212; 
-    --surface: #1E1E1E; 
-    --text-dark: #D4D4D4; 
-    --text-muted: #858585; 
-    --primary: #0E639C; 
-    --primary-hover: #1177BB;
-    --secondary: #2D2D2D; 
-    --secondary-hover: #3D3D3D;
-    --success: #6A9955; 
-    --border: #333333;
-    
-    --main-font: 'JetBrains Mono', monospace;
     --bg-pattern: none;
     --header-border: 1px solid var(--border);
-    --header-icon: var(--primary);
-    --shadow-card: 0 10px 30px rgba(0,0,0,0.5);
+    --header-icon: var(--success);
+    --shadow-card: 0 1px 3px rgba(28,28,26,0.06), 0 8px 24px rgba(28,28,26,0.05);
+    --history-bg: repeating-linear-gradient(transparent, transparent 29px, rgba(220, 218, 210, 0.5) 30px);
+
+    --btn-active-bg: var(--secondary);
+    --btn-active-color: var(--primary);
+    --btn-active-shadow: 0 2px 8px rgba(53, 80, 140, 0.15);
+
+    --color-success: #2E7D5B;
+    --color-error: #B23A3A;
+    --color-warn: #C97F2E;
+    --color-info: #35508C;
+    --bg-error-light: rgba(178, 58, 58, 0.10);
+    --bg-warn-light: rgba(201, 127, 46, 0.12);
+
+    --overlay-bg: rgba(20, 20, 18, 0.45);
+    --btn-danger-bg: #B23A3A;
+    --btn-danger-hover: #8F2E2E;
+}
+
+/* 2. DARK MODE (pasangan konsisten, bukan tema berbeda) */
+[data-theme="dark"] {
+    --bg-main: #14161A;
+    --surface: #1B1E24;
+    --text-dark: #E8E7E2;
+    --text-muted: #9B9A93;
+    --primary: #6E93DD;
+    --primary-hover: #86A6E6;
+    --secondary: #262A33;
+    --secondary-hover: #2F343F;
+    --success: #E0A85C;
+    --border: #33373F;
+
+    --ui-font: 'Inter', sans-serif;
+    --content-font: 'Lora', serif;
+    --main-font: var(--ui-font);
+
+    --bg-pattern: none;
+    --header-border: 1px solid var(--border);
+    --header-icon: var(--success);
+    --shadow-card: 0 8px 30px rgba(0,0,0,0.35);
     --history-bg: none;
 
-    --btn-active-bg: transparent;
-    --btn-active-color: #4EC9B0;
-    --btn-active-shadow: 0 0 12px rgba(78, 201, 176, 0.15);
+    --btn-active-bg: var(--secondary);
+    --btn-active-color: var(--success);
+    --btn-active-shadow: 0 0 0 1px var(--success) inset, 0 0 16px rgba(224,168,92,0.15);
 
-    --color-success: #4EC9B0;
-    --color-error: #F44747;
-    --color-warn: #DCDCAA;
-    --color-info: #569CD6;
-    --bg-error-light: rgba(244, 71, 71, 0.15);
-    --bg-warn-light: rgba(220, 220, 170, 0.15);
-    
-    --overlay-bg: rgba(0, 0, 0, 0.65);
-    --btn-danger-bg: #F44747;
-    --btn-danger-hover: #D13B3B;
+    --color-success: #4CAF7D;
+    --color-error: #E15C5C;
+    --color-warn: #E0A85C;
+    --color-info: #6E93DD;
+    --bg-error-light: rgba(225, 92, 92, 0.15);
+    --bg-warn-light: rgba(224, 168, 92, 0.15);
+
+    --overlay-bg: rgba(0, 0, 0, 0.6);
+    --btn-danger-bg: #E15C5C;
+    --btn-danger-hover: #C24747;
 }
 
 * {
@@ -108,6 +115,7 @@ body {
     padding: 30px;
     margin-bottom: 24px;
     border: 1px solid var(--border);
+    border-top: 3px solid var(--primary);
     box-shadow: var(--shadow-card);
 }
 
@@ -169,7 +177,7 @@ input:focus, select:focus {
 .btn-success:hover { background: var(--success); opacity: 0.8; }
 
 .btn.active-format { background: var(--primary) !important; color: var(--surface) !important; }
-[data-theme="dark"] .btn.active-format { background: transparent !important; color: #4EC9B0 !important; border-color: #4EC9B0 !important; }
+[data-theme="dark"] .btn.active-format { background: transparent !important; color: var(--success) !important; border-color: var(--success) !important; }
 
 .icon-btn {
     background: transparent; color: var(--text-muted);
@@ -186,6 +194,7 @@ input:focus, select:focus {
     background: var(--bg-main); padding: 20px; border-radius: var(--radius-md);
     border: 1px solid var(--border);
 }
+#output-text { font-family: var(--content-font); }
 
 .history-container { max-height: 350px; overflow-y: auto; padding-right: 5px; }
 .history-container::-webkit-scrollbar { width: 8px; }
@@ -199,7 +208,7 @@ input:focus, select:focus {
     background-image: var(--history-bg);
 }
 
-.history-text { font-size: 1rem; line-height: 1.8; color: var(--text-dark); }
+.history-text { font-size: 1rem; line-height: 1.8; color: var(--text-dark); font-family: var(--content-font); }
 .history-badge {
     font-size: 0.7rem; font-weight: 700; padding: 2px 6px;
     border-radius: 4px; background: var(--secondary);
