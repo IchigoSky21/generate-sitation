@@ -7,7 +7,7 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 ![PWA](https://img.shields.io/badge/PWA-Ready-blueviolet?style=for-the-badge&logo=pwa)
 
-Aplikasi web statis berbasis *Client-Side* untuk menyusun dan mengelola daftar pustaka secara otomatis. Dirancang dengan antarmuka bergaya **Meja Kerja Akademik** — modern, informatif, dan mendukung **Dark Mode** — aplikasi ini mempercepat produktivitas penyusunan referensi akademik untuk laporan tugas kelompok, tugas akhir, hingga draf paper riset.
+Aplikasi web statis berbasis *Client-Side* untuk menyusun dan mengelola daftar pustaka secara otomatis. Dirancang dengan antarmuka bergaya **Meja Kerja Akademik** modern, informatif, dan mendukung **Dark Mode** aplikasi ini mempercepat produktivitas penyusunan referensi akademik untuk laporan tugas kelompok, tugas akhir, hingga draf paper riset.
 
 Sangat ideal untuk penyusunan sitasi pada karya tulis ilmiah yang menuntut format referensi ketat (IEEE / APA).
 
