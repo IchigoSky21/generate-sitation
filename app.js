@@ -17,6 +17,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const sourceInput     = document.getElementById('input-source');
     const doiInput        = document.getElementById('input-doi-quick');
     const btnDoiFetch     = document.getElementById('btn-doi-fetch');
+    const titleSearchInput = document.getElementById('input-title-search');
+    const btnTitleSearch   = document.getElementById('btn-title-search');
+    const searchResultsEl  = document.getElementById('search-results');
+
+    /* ====================================================
+       HTML ESCAPING (XSS PREVENTION)
+       Dipakai untuk setiap data dari input user / API eksternal
+       sebelum dimasukkan lewat innerHTML.
+    ==================================================== */
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
 
     /* ====================================================
        DARK/LIGHT THEME TOGGLE
@@ -80,8 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
         el.innerHTML = `
             <i class="${iconMap[type] || iconMap.info} toast-icon" aria-hidden="true"></i>
             <div class="toast-body">
-                <div class="toast-title">${message}</div>
-                ${subtitle ? `<div class="toast-sub">${subtitle}</div>` : ''}
+                <div class="toast-title">${escapeHtml(message)}</div>
+                ${subtitle ? `<div class="toast-sub">${escapeHtml(subtitle)}</div>` : ''}
             </div>
             <button class="toast-close" aria-label="Tutup notifikasi">×</button>
             <div class="toast-progress" style="animation-duration:${duration}ms"></div>
@@ -142,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('conf-ok').textContent    = confirmLabel;
 
             function close(result) {
+                document.removeEventListener('keydown', keyHandler);
                 overlay.classList.remove('visible');
                 overlay.addEventListener('transitionend', () => {
                     overlay.style.display = 'none';
@@ -154,8 +173,8 @@ document.addEventListener('DOMContentLoaded', () => {
             overlay.onclick = e => { if (e.target === overlay) close(false); };
 
             const keyHandler = e => {
-                if (e.key === 'Escape') { document.removeEventListener('keydown', keyHandler); close(false); }
-                if (e.key === 'Enter')  { document.removeEventListener('keydown', keyHandler); close(true);  }
+                if (e.key === 'Escape') close(false);
+                if (e.key === 'Enter')  close(true);
             };
             document.addEventListener('keydown', keyHandler);
 
@@ -200,21 +219,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const toTitleCase    = s => s.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.substr(1).toLowerCase());
     const toSentenceCase = s => s ? s.charAt(0).toUpperCase() + s.substr(1).toLowerCase() : s;
 
-    function ieeeName(fullName) {
+    function formatPersonName(fullName, style) {
         const parts = fullName.trim().split(/\s+/);
         if (parts.length < 2) return toTitleCase(fullName.trim());
         const last     = toTitleCase(parts[parts.length - 1]);
         const initials = parts.slice(0, -1).map(p => p.charAt(0).toUpperCase() + '.').join(' ');
-        return `${initials} ${last}`;
+        return style === 'apa' ? `${last}, ${initials}` : `${initials} ${last}`;
     }
-
-    function apaName(fullName) {
-        const parts = fullName.trim().split(/\s+/);
-        if (parts.length < 2) return toTitleCase(fullName.trim());
-        const last     = toTitleCase(parts[parts.length - 1]);
-        const initials = parts.slice(0, -1).map(p => p.charAt(0).toUpperCase() + '.').join(' ');
-        return `${last}, ${initials}`;
-    }
+    const ieeeName = fullName => formatPersonName(fullName, 'ieee');
+    const apaName  = fullName => formatPersonName(fullName, 'apa');
 
     function formatIEEEAuthors(str, isOrg) {
         if (isOrg) return str.trim();
@@ -424,6 +437,29 @@ document.addEventListener('DOMContentLoaded', () => {
     btnDoiFetch.addEventListener('click', fetchDOI);
     doiInput.addEventListener('keydown', e => { if (e.key === 'Enter') fetchDOI(); });
 
+    function applyWorkToForm(m) {
+        const authors  = (m.author || []).map(a => [a.given, a.family].filter(Boolean).join(' ')).join(', ');
+        const year     = (m.published || m['published-print'] || m['published-online'] || {})['date-parts']?.[0]?.[0] || '';
+        const journal  = (m['container-title'] || [''])[0];
+        const typeMap  = { 'journal-article':'journal','book':'book','proceedings-article':'conference','dissertation':'thesis' };
+        const detected = typeMap[m.type] || 'journal';
+
+        document.getElementById('input-author').value = authors;
+        document.getElementById('input-title').value  = (m.title || [''])[0];
+        document.getElementById('input-year').value   = year;
+        document.getElementById('input-source').value = journal;
+
+        sourceBtns.forEach(b => { b.classList.remove('active'); if (b.dataset.type === detected) b.classList.add('active'); });
+        currentSourceType = detected;
+        updateFormFields();
+
+        const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+        setVal('input-volume', m.volume || '');
+        setVal('input-issue',  m.issue  || '');
+        setVal('input-pages',  m.page   || '');
+        setVal('input-url',    m.URL    || '');
+    }
+
     async function fetchDOI() {
         let val = doiInput.value.trim();
         if (!val) {
@@ -437,41 +473,139 @@ document.addEventListener('DOMContentLoaded', () => {
         btnDoiFetch.disabled  = true;
 
         try {
-            const res = await fetch(`https://api.crossref.org/works/${encodeURIComponent(val)}`);
+            const controller = new AbortController();
+            const timeoutId  = setTimeout(() => controller.abort(), 10000);
+            let res;
+            try {
+                res = await fetch(`https://api.crossref.org/works/${encodeURIComponent(val)}`, { signal: controller.signal });
+            } finally {
+                clearTimeout(timeoutId);
+            }
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const { message: m } = await res.json();
 
-            const authors  = (m.author || []).map(a => [a.given, a.family].filter(Boolean).join(' ')).join(', ');
-            const year     = (m.published || m['published-print'] || m['published-online'] || {})['date-parts']?.[0]?.[0] || '';
-            const journal  = (m['container-title'] || [''])[0];
-            const typeMap  = { 'journal-article':'journal','book':'book','proceedings-article':'conference','dissertation':'thesis' };
-            const detected = typeMap[m.type] || 'journal';
-
-            document.getElementById('input-author').value = authors;
-            document.getElementById('input-title').value  = (m.title || [''])[0];
-            document.getElementById('input-year').value   = year;
-            document.getElementById('input-source').value = journal;
-
-            sourceBtns.forEach(b => { b.classList.remove('active'); if (b.dataset.type === detected) b.classList.add('active'); });
-            currentSourceType = detected;
-            updateFormFields();
-
-            const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
-            setVal('input-volume', m.volume || '');
-            setVal('input-issue',  m.issue  || '');
-            setVal('input-pages',  m.page   || '');
-            setVal('input-url',    m.URL    || '');
+            applyWorkToForm(m);
 
             btnDoiFetch.innerHTML = '<i class=\'bx bx-check\'></i> Berhasil!';
             toast('Data DOI berhasil dimuat!', 'success', 3000, `${(m.title || [''])[0].slice(0, 60)}...`);
             setTimeout(() => { btnDoiFetch.innerHTML = '<i class=\'bx bx-bolt-circle\'></i> Auto-Fill'; }, 2500);
 
         } catch (err) {
-            toast('Gagal memuat data DOI', 'error', 5000, 'Pastikan DOI valid dan koneksi internet tersedia.');
+            if (err.name === 'AbortError') {
+                toast('Waktu permintaan habis', 'error', 5000, 'Server DOI tidak merespons dalam 10 detik. Coba lagi.');
+            } else {
+                toast('Gagal memuat data DOI', 'error', 5000, 'Pastikan DOI valid dan koneksi internet tersedia.');
+            }
             btnDoiFetch.innerHTML = '<i class=\'bx bx-bolt-circle\'></i> Auto-Fill';
         }
         btnDoiFetch.disabled = false;
     }
+
+    /* ====================================================
+       TITLE / KEYWORD SEARCH (CrossRef)
+    ==================================================== */
+    let searchAbortController = null;
+    let searchDebounceTimer   = null;
+    let lastSearchResults     = [];
+
+    function hideSearchResults() {
+        searchResultsEl.innerHTML = '';
+        searchResultsEl.classList.add('hidden');
+    }
+
+    function renderSearchState(state, payload) {
+        if (state === 'loading') {
+            searchResultsEl.innerHTML = `<div class="search-result-loading"><i class='bx bx-loader-alt bx-spin'></i> Mencari...</div>`;
+        } else if (state === 'empty') {
+            searchResultsEl.innerHTML = `<div class="search-result-empty">Tidak ada hasil ditemukan. Coba kata kunci lain.</div>`;
+        } else if (state === 'error') {
+            searchResultsEl.innerHTML = `<div class="search-result-empty">${escapeHtml(payload || 'Gagal memuat hasil pencarian.')}</div>`;
+        } else if (state === 'results') {
+            lastSearchResults = payload;
+            searchResultsEl.innerHTML = payload.map((m, idx) => {
+                const title   = (m.title || ['(Tanpa judul)'])[0];
+                const authors = (m.author || []).slice(0, 3).map(a => [a.given, a.family].filter(Boolean).join(' ')).join(', ');
+                const authorsSuffix = (m.author || []).length > 3 ? ' et al.' : '';
+                const year    = (m.published || m['published-print'] || m['published-online'] || {})['date-parts']?.[0]?.[0] || 's.a.';
+                const journal = (m['container-title'] || [''])[0];
+                const metaParts = [authors ? `${authors}${authorsSuffix}` : null, year, journal].filter(Boolean);
+                return `
+                    <button type="button" class="search-result-item" role="option" data-idx="${idx}">
+                        <div class="search-result-title">${escapeHtml(title)}</div>
+                        <div class="search-result-meta">${escapeHtml(metaParts.join(' · '))}</div>
+                    </button>`;
+            }).join('');
+        }
+        searchResultsEl.classList.remove('hidden');
+    }
+
+    async function searchByTitle(query) {
+        if (searchAbortController) searchAbortController.abort();
+        searchAbortController = new AbortController();
+        const timeoutId = setTimeout(() => searchAbortController.abort(), 10000);
+
+        renderSearchState('loading');
+
+        try {
+            const url = `https://api.crossref.org/works?query.bibliographic=${encodeURIComponent(query)}&rows=6`;
+            const res = await fetch(url, { signal: searchAbortController.signal });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data  = await res.json();
+            const items = data?.message?.items || [];
+            if (!items.length) renderSearchState('empty');
+            else renderSearchState('results', items);
+        } catch (err) {
+            if (err.name === 'AbortError') return; // dibatalkan oleh pencarian berikutnya atau timeout; diamkan
+            renderSearchState('error', 'Gagal memuat hasil. Periksa koneksi internet Anda.');
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
+    function runTitleSearch() {
+        const query = titleSearchInput.value.trim();
+        if (!query) {
+            toast('Kolom pencarian kosong!', 'warning', 3000, 'Masukkan judul atau kata kunci terlebih dahulu.');
+            titleSearchInput.focus();
+            return;
+        }
+        if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+        searchByTitle(query);
+    }
+
+    btnTitleSearch.addEventListener('click', runTitleSearch);
+
+    titleSearchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); runTitleSearch(); }
+        if (e.key === 'Escape') hideSearchResults();
+    });
+
+    // Live search dengan debounce saat mengetik (min. 4 karakter)
+    titleSearchInput.addEventListener('input', () => {
+        const query = titleSearchInput.value.trim();
+        if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+        if (query.length < 4) { hideSearchResults(); return; }
+        searchDebounceTimer = setTimeout(() => searchByTitle(query), 500);
+    });
+
+    searchResultsEl.addEventListener('click', e => {
+        const btn = e.target.closest('.search-result-item');
+        if (!btn) return;
+        const item = lastSearchResults[Number(btn.dataset.idx)];
+        if (!item) return;
+        applyWorkToForm(item);
+        hideSearchResults();
+        titleSearchInput.value = (item.title || [''])[0];
+        toast('Data sitasi berhasil dimuat!', 'success', 3000, `${(item.title || [''])[0].slice(0, 60)}...`);
+    });
+
+    document.addEventListener('click', e => {
+        if (!searchResultsEl.classList.contains('hidden') &&
+            !searchResultsEl.contains(e.target) &&
+            e.target !== titleSearchInput && e.target !== btnTitleSearch) {
+            hideSearchResults();
+        }
+    });
 
     /* ====================================================
        HISTORY MANAGEMENT
@@ -489,20 +623,20 @@ document.addEventListener('DOMContentLoaded', () => {
             historyList.innerHTML = '<p class="text-muted" style="text-align:center;padding:20px;">Belum ada riwayat sitasi.</p>';
             return;
         }
-        citationHistory.forEach((item, idx) => {
+        const rows = citationHistory.map((item, idx) => {
             const isIEEE   = item.type === 'IEEE';
             const badgeColor = isIEEE ? 'var(--color-info)' : 'var(--color-success)';
             const numLabel = isIEEE && item.ieeeNum
-                ? `<span style="color:var(--color-success);font-size:0.9rem;font-weight:700;">[${item.ieeeNum}]</span>` : '';
-            historyList.innerHTML += `
+                ? `<span style="color:var(--color-success);font-size:0.9rem;font-weight:700;">[${escapeHtml(item.ieeeNum)}]</span>` : '';
+            return `
                 <div class="history-item">
                     <div style="flex:1;min-width:0;">
                         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
-                            <span class="history-badge" style="color:${badgeColor};border-color:${badgeColor};">${item.type}</span>
+                            <span class="history-badge" style="color:${badgeColor};border-color:${badgeColor};">${escapeHtml(item.type)}</span>
                             ${numLabel}
-                            <span style="font-size:0.7rem;color:var(--text-muted);">${getSourceTypeLabel(item.sourceType)}</span>
+                            <span style="font-size:0.7rem;color:var(--text-muted);">${escapeHtml(getSourceTypeLabel(item.sourceType))}</span>
                         </div>
-                        <p class="history-text" id="hist-text-${idx}">${item.text}</p>
+                        <p class="history-text" id="hist-text-${idx}">${escapeHtml(item.text)}</p>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
                         <button class="btn icon-btn" onclick="copyHistory(${idx})" title="Salin"><i class='bx bx-copy'></i></button>
@@ -510,6 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>`;
         });
+        historyList.innerHTML = rows.join('');
     }
 
     function getSourceTypeLabel(type) {
@@ -561,6 +696,14 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ====================================================
        EXPORT
     ==================================================== */
+    function escapeBibtex(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/\\/g, '\\textbackslash{}')
+            .replace(/([{}])/g, '\\$1')
+            .replace(/([%&#_$])/g, '\\$1');
+    }
+
     btnExportBibtex.addEventListener('click', () => {
         if (!citationHistory.length) {
             toast('Tidak ada sitasi untuk diekspor!', 'warning', 3000, 'Generate minimal satu sitasi terlebih dahulu.');
@@ -571,22 +714,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const d    = item.rawData;
             const key  = (d.author || 'unknown').split(/[\s,]/)[0].replace(/[^a-zA-Z]/g, '') + (d.year || '0000');
             const type = { journal:'@article', book:'@book', conference:'@inproceedings', website:'@misc', thesis:'@mastersthesis' }[item.sourceType || 'journal'] || '@misc';
-            bib += `${type}{${key}_${i + 1},\n  author = {${d.author || ''}},\n  title  = {${d.title  || ''}},\n  year   = {${d.year   || ''}},\n`;
+            bib += `${type}{${key}_${i + 1},\n  author = {${escapeBibtex(d.author)}},\n  title  = {${escapeBibtex(d.title)}},\n  year   = {${escapeBibtex(d.year)}},\n`;
             if (item.sourceType === 'book') {
-                bib += `  publisher = {${d.source || ''}},\n`;
-                if (d.city) bib += `  address = {${d.city}},\n`;
+                bib += `  publisher = {${escapeBibtex(d.source)}},\n`;
+                if (d.city) bib += `  address = {${escapeBibtex(d.city)}},\n`;
             } else if (item.sourceType === 'conference') {
-                bib += `  booktitle = {${d.source || ''}},\n`;
-                if (d.confPages) bib += `  pages = {${d.confPages}},\n`;
+                bib += `  booktitle = {${escapeBibtex(d.source)}},\n`;
+                if (d.confPages) bib += `  pages = {${escapeBibtex(d.confPages)}},\n`;
             } else if (item.sourceType === 'website') {
                 bib += `  howpublished = {\\url{${d.webUrl || ''}}},\n`;
             } else if (item.sourceType === 'thesis') {
-                bib += `  school = {${d.source || ''}},\n  type = {${d.thesisType || 'Skripsi'}},\n`;
+                bib += `  school = {${escapeBibtex(d.source)}},\n  type = {${escapeBibtex(d.thesisType || 'Skripsi')}},\n`;
             } else {
-                bib += `  journal = {${d.source || ''}},\n`;
-                if (d.volume) bib += `  volume = {${d.volume}},\n`;
-                if (d.issue)  bib += `  number = {${d.issue}},\n`;
-                if (d.pages)  bib += `  pages  = {${d.pages}},\n`;
+                bib += `  journal = {${escapeBibtex(d.source)}},\n`;
+                if (d.volume) bib += `  volume = {${escapeBibtex(d.volume)}},\n`;
+                if (d.issue)  bib += `  number = {${escapeBibtex(d.issue)}},\n`;
+                if (d.pages)  bib += `  pages  = {${escapeBibtex(d.pages)}},\n`;
             }
             if (d.url) bib += `  url = {${d.url}},\n`;
             bib += `}\n\n`;

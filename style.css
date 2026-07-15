@@ -303,3 +303,29 @@ input:focus, select:focus {
 
 .btn-danger { background: var(--btn-danger-bg); color: #fff; border-color: var(--btn-danger-bg); }
 .btn-danger:hover { background: var(--btn-danger-hover); border-color: var(--btn-danger-hover); }
+
+/* ====================================================
+   TITLE / KEYWORD SEARCH (CrossRef)
+==================================================== */
+.search-results {
+    position: absolute; z-index: 30; top: 100%; left: 0; right: 0; margin-top: 6px;
+    background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius-md);
+    box-shadow: 4px 4px 0px var(--border);
+    max-height: 340px; overflow-y: auto;
+}
+.search-results.hidden { display: none; }
+
+.search-result-item {
+    display: block; width: 100%; text-align: left; background: none; border: none;
+    padding: 12px 14px; cursor: pointer; border-bottom: 1px solid var(--border);
+    font-family: var(--main-font); color: var(--text-dark);
+}
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover, .search-result-item:focus { background: var(--secondary); outline: none; }
+
+.search-result-title { font-weight: 700; font-size: 0.9rem; line-height: 1.35; margin-bottom: 4px; }
+.search-result-meta   { font-size: 0.75rem; color: var(--text-muted); }
+
+.search-result-empty, .search-result-loading {
+    padding: 16px 14px; text-align: center; font-size: 0.85rem; color: var(--text-muted);
+}
