@@ -9,7 +9,7 @@ A client-side web application for creating and managing academic references in *
 
 ## 🌐 Live Demo
 
-**[Open the application](https://ichigosky21.github.io/generate-sitation/)**
+**[Open the application](https://generator-sitasi.vercel.app/)**
 
 ## ✨ Key Features
 
@@ -45,7 +45,7 @@ A client-side web application for creating and managing academic references in *
 - Light and dark themes with persisted preferences.
 - Custom toast notifications and confirmation dialog.
 - Responsive academic-workspace-inspired interface.
-- Web app manifest and service worker for installable PWA behavior and caching of the application shell.
+- Web app manifest and service worker for installable PWA behavior and caching of the application shell. Core metadata lookup and search features require an internet connection.
 - SEO-related files including `robots.txt`, `sitemap.xml`, and social metadata in `index.html`.
 
 ## 🧠 How It Works
@@ -82,6 +82,8 @@ generate-sitation/
 ├── app.js              # Citation generation, APIs, history, import/export, theme logic
 ├── index.html          # Application markup and metadata
 ├── manifest.json       # PWA metadata and icons
+├── icon-192.svg        # PWA icon
+├── icon-512.svg        # PWA icon
 ├── preview.png         # Preview image included in the repository
 ├── robots.txt          # Search crawler rules
 ├── sitemap.xml         # Sitemap
