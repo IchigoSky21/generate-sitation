@@ -9,7 +9,7 @@ A client-side web application for creating and managing academic references in *
 
 ## 🌐 Live Demo
 
-**[Open the application]([https://generator-sitasi.vercel.app/](https://generate-sitation-app.vercel.app))**
+**[Open the application]([https://generator-sitasi.vercel.app/])**
 
 ## ✨ Key Features
 
