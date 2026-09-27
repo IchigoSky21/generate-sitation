@@ -104,7 +104,9 @@ body {
 .top-header h1 {
     font-family: var(--brand-font); font-size: 2.3rem; font-weight: 700; color: var(--text-dark);
     display: flex; justify-content: center; align-items: center; gap: 10px;
+    padding: 0 56px;
 }
+.top-header p { padding: 0 56px; }
 
 .text-primary { color: var(--primary); }
 .text-success { color: var(--success); }
@@ -225,13 +227,16 @@ input:focus, select:focus {
 @media (max-width: 600px) { 
    .form-row { flex-direction: column; gap: 0; } 
    .action-buttons { flex-direction: column; } 
-   .btn { width: 100%; } 
+   .btn:not(.icon-btn) { width: 100%; } 
    .card-header { flex-direction: column; align-items: flex-start; }
    .doi-group { flex-direction: column; }
    .search-group { flex-direction: column; }
    body { padding: 20px 12px; }
    .card { padding: 20px; }
-   .top-header h1 { font-size: 1.5rem; }
+   .top-header h1 { font-size: 1.5rem; padding: 0 44px; }
+   .top-header p { padding: 0 8px; }
+   #btn-theme-toggle { padding: 8px !important; }
+   #btn-theme-toggle i { font-size: 1rem; }
 }
 
 #toast-container {
