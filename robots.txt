@@ -1,7 +1,7 @@
 # robots.txt — Generator Sitasi
-# Canonical site: https://generator-sitasi.vercel.app/
+# Canonical site: https://generate-sitation-app.vercel.app/
 
 User-agent: *
 Allow: /
 
-Sitemap: https://generator-sitasi.vercel.app/sitemap.xml
+Sitemap: https://generate-sitation-app.vercel.app/sitemap.xml
