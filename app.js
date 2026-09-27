@@ -58,10 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (themeIcon) {
             if (theme === 'dark') {
                 themeIcon.className = 'bx bx-sun';
-                if(metaThemeColor) metaThemeColor.setAttribute('content', '#14161A');
+                if(metaThemeColor) metaThemeColor.setAttribute('content', '#10131A');
             } else {
                 themeIcon.className = 'bx bx-moon';
-                if(metaThemeColor) metaThemeColor.setAttribute('content', '#35508C');
+                if(metaThemeColor) metaThemeColor.setAttribute('content', '#1F3A5F');
             }
         }
     }
