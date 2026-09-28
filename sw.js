@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sitasi-cache-v13';
+const CACHE_NAME = 'sitasi-cache-v14';
 const BASE_URL = self.registration.scope;
 
 const urlsToCache = [
